@@ -98,7 +98,7 @@
 
     <dependency>
       <groupId>walkingkooka</groupId>
-      <artifactId>walkingkooka-template</artifactId>
+      <artifactId>walkingkooka-terminal</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
