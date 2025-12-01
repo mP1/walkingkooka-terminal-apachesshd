@@ -49,10 +49,10 @@ import java.util.function.BiFunction;
 public final class ApacheSshdServer {
 
     public static ApacheSshdServer with(final IpPort port,
-                                           final BiFunction<String, String, Boolean> passwordAuthenticator,
-                                           final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
-                                           final EnvironmentContext environmentContext,
-                                           final TerminalServerContext terminalServerContext) {
+                                        final BiFunction<String, String, Boolean> passwordAuthenticator,
+                                        final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
+                                        final EnvironmentContext environmentContext,
+                                        final TerminalServerContext terminalServerContext) {
         return ApacheSshdServer.with(
             Objects.requireNonNull(port, "port"),
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
@@ -151,7 +151,7 @@ public final class ApacheSshdServer {
 
         final ApacheSshdServer server = new ApacheSshdServer(
             IpPort.with(2000),
-            (u,p) -> u.length() > 0, // TODO not empty password
+            (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
@@ -172,9 +172,9 @@ public final class ApacheSshdServer {
 
         final Scanner keyboard = new Scanner(System.in);
 
-        for(;;) {
+        for (; ; ) {
             final String line = keyboard.next();
-            if("Q".equals(line)) {
+            if ("Q".equals(line)) {
                 break;
             }
         }
