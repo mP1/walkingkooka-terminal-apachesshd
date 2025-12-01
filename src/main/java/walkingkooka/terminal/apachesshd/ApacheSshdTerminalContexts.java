@@ -17,9 +17,34 @@
 
 package walkingkooka.terminal.apachesshd;
 
+import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.reflect.PublicStaticHelper;
+import walkingkooka.terminal.TerminalContext;
+import walkingkooka.terminal.TerminalId;
+
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
+
+    /**
+     * {@see ApacheSshdServerTerminalContext}
+     */
+    public static TerminalContext apacheSshd(final TerminalId terminalId,
+                                             final InputStream in,
+                                             final OutputStream out,
+                                             final OutputStream err,
+                                             final Runnable closeSession,
+                                             final EnvironmentContext environmentContext) {
+        return ApacheSshdServerTerminalContext.with(
+            terminalId,
+            in,
+            out,
+            err,
+            closeSession,
+            environmentContext
+        );
+    }
 
     /**
      * Stop creation
