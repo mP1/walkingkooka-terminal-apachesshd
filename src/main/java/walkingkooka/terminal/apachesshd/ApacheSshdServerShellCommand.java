@@ -32,8 +32,8 @@ import walkingkooka.net.email.EmailAddress;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.server.TerminalServerContext;
+import walkingkooka.terminal.shell.TerminalShell;
 import walkingkooka.terminal.shell.TerminalShellContext;
-import walkingkooka.terminal.shell.TerminalShells;
 import walkingkooka.text.LineEnding;
 import walkingkooka.text.printer.Printer;
 
@@ -53,17 +53,21 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerSessionHolder,
     SessionHolder<ServerSession> {
 
-    static ApacheSshdServerShellCommand with(final TerminalServerContext terminalServerContext,
+    static ApacheSshdServerShellCommand with(final TerminalShell terminalShell,
+                                             final TerminalServerContext terminalServerContext,
                                              final EnvironmentContext environmentContext) {
         return new ApacheSshdServerShellCommand(
+            terminalShell,
             terminalServerContext,
             environmentContext
         );
     }
 
-    private ApacheSshdServerShellCommand(final TerminalServerContext terminalServerContext,
+    private ApacheSshdServerShellCommand(final TerminalShell terminalShell,
+                                         final TerminalServerContext terminalServerContext,
                                          final EnvironmentContext environmentContext) {
         super();
+        this.terminalShell = terminalShell;
         this.terminalServerContext = terminalServerContext;
         this.environmentContext = environmentContext;
     }
@@ -169,10 +173,8 @@ final class ApacheSshdServerShellCommand implements Command,
      * Begins a shell which will continue to consume lines of text and evaluate each complete line or multi-line of text.
      * @param terminalContext
      */
-    private static void shell(final TerminalContext terminalContext) {
-        TerminalShells.basic(
-            50 // timeout
-        ).start(
+    private void shell(final TerminalContext terminalContext) {
+        this.terminalShell.start(
             new TerminalShellContext() {
                 @Override
                 public void evaluate(final String text) {
@@ -219,6 +221,8 @@ final class ApacheSshdServerShellCommand implements Command,
             }
         );
     }
+
+    private final TerminalShell terminalShell;
 
     @Override
     public void destroy(final ChannelSession channel) {
