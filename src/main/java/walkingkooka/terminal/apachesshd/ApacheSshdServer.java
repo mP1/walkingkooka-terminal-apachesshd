@@ -53,7 +53,7 @@ public final class ApacheSshdServer {
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
-        return ApacheSshdServer.with(
+        return new ApacheSshdServer(
             Objects.requireNonNull(port, "port"),
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
             Objects.requireNonNull(publicKeyAuthenticator, "publicKeyAuthenticator"),
