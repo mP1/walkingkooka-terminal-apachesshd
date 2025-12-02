@@ -164,8 +164,7 @@ public final class ApacheSshdServer {
             TerminalServerContexts.basic(
                 () -> TerminalId.with(
                     nextTerminalId.incrementAndGet()
-                ),
-                (EnvironmentContext e) -> TerminalContexts.fake()
+                )
             )
         );
         server.start();
