@@ -30,6 +30,8 @@ import walkingkooka.terminal.TerminalContexts;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.server.TerminalServerContexts;
+import walkingkooka.terminal.shell.TerminalShell;
+import walkingkooka.terminal.shell.TerminalShells;
 import walkingkooka.text.LineEnding;
 
 import java.io.IOException;
@@ -51,12 +53,14 @@ public final class ApacheSshdServer {
     public static ApacheSshdServer with(final IpPort port,
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
+                                        final TerminalShell terminalShell,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
         return new ApacheSshdServer(
             Objects.requireNonNull(port, "port"),
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
             Objects.requireNonNull(publicKeyAuthenticator, "publicKeyAuthenticator"),
+            Objects.requireNonNull(terminalShell, "terminalShell"),
             Objects.requireNonNull(environmentContext, "environmentContext"),
             Objects.requireNonNull(terminalServerContext, "terminalServerContext")
         );
@@ -65,11 +69,14 @@ public final class ApacheSshdServer {
     private ApacheSshdServer(final IpPort port,
                              final BiFunction<String, String, Boolean> passwordAuthenticator,
                              final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
+                             final TerminalShell terminalShell,
                              final EnvironmentContext environmentContext,
                              final TerminalServerContext terminalServerContext) {
         this.port = port;
         this.passwordAuthenticator = passwordAuthenticator;
         this.publicKeyAuthenticator = publicKeyAuthenticator;
+
+        this.terminalShell = terminalShell;
 
         this.environmentContext = environmentContext;
         this.terminalServerContext = terminalServerContext;
@@ -84,6 +91,7 @@ public final class ApacheSshdServer {
 
         sshd.setShellFactory(
             (ChannelSession channel) -> ApacheSshdServerShellCommand.with(
+                this.terminalShell,
                 this.terminalServerContext,
                 this.environmentContext
             )
@@ -121,6 +129,7 @@ public final class ApacheSshdServer {
 
     private final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator;
 
+    private final TerminalShell terminalShell;
     /**
      * The template {@link EnvironmentContext} which shouldnt have a user, but has the system locale.
      */
@@ -153,6 +162,7 @@ public final class ApacheSshdServer {
             IpPort.with(2000),
             (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
+            TerminalShells.basic(50), //shell
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
                     LineEnding.NL,
