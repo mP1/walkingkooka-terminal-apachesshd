@@ -48,7 +48,10 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
                 Locale.FRANCE,
                 LocalDateTime::now,
                 EnvironmentContext.ANONYMOUS
-            )
+            ),
+            (c) -> {
+                throw new UnsupportedOperationException();
+            }
         );
     }
 
