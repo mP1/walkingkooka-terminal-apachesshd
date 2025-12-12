@@ -21,9 +21,11 @@ import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.reflect.PublicStaticHelper;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
+import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.function.Function;
 
 public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
 
@@ -35,14 +37,16 @@ public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
                                              final OutputStream out,
                                              final OutputStream err,
                                              final Runnable closeSession,
-                                             final EnvironmentContext environmentContext) {
+                                             final EnvironmentContext environmentContext,
+                                             final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         return ApacheSshdServerTerminalContext.with(
             terminalId,
             in,
             out,
             err,
             closeSession,
-            environmentContext
+            environmentContext,
+            expressionEvaluationContextFactory
         );
     }
 

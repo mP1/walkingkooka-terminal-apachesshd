@@ -31,6 +31,7 @@ import walkingkooka.io.TextReader;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
+import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.shell.TerminalShell;
 import walkingkooka.terminal.shell.TerminalShellContext;
@@ -42,6 +43,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A {@link Command} that prepares a new shell instance using the provided {@link TerminalShellContext} to eventually
@@ -54,20 +56,24 @@ final class ApacheSshdServerShellCommand implements Command,
     SessionHolder<ServerSession> {
 
     static ApacheSshdServerShellCommand with(final TerminalShell terminalShell,
+                                             final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                              final TerminalServerContext terminalServerContext,
                                              final EnvironmentContext environmentContext) {
         return new ApacheSshdServerShellCommand(
             terminalShell,
+            expressionEvaluationContextFactory,
             terminalServerContext,
             environmentContext
         );
     }
 
     private ApacheSshdServerShellCommand(final TerminalShell terminalShell,
+                                         final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                          final TerminalServerContext terminalServerContext,
                                          final EnvironmentContext environmentContext) {
         super();
         this.terminalShell = terminalShell;
+        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
         this.terminalServerContext = terminalServerContext;
         this.environmentContext = environmentContext;
     }
@@ -161,7 +167,8 @@ final class ApacheSshdServerShellCommand implements Command,
             this.environmentContext.cloneEnvironment()
                 .setUser(
                     Optional.of(user)
-                ).setLineEnding(LineEnding.CRNL)
+                ).setLineEnding(LineEnding.CRNL),
+            this.expressionEvaluationContextFactory
         );
     }
 
@@ -169,6 +176,7 @@ final class ApacheSshdServerShellCommand implements Command,
 
     private final EnvironmentContext environmentContext;
 
+    private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
     /**
      * Begins a shell which will continue to consume lines of text and evaluate each complete line or multi-line of text.
      * @param terminalContext
@@ -213,6 +221,16 @@ final class ApacheSshdServerShellCommand implements Command,
                 public Printer error() {
                     return terminalContext.error();
                 }
+
+                @Override
+                public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {
+                    if(null == this.terminalExpressionEvaluationContext) {
+                        this.terminalExpressionEvaluationContext = ApacheSshdServerShellCommand.this.expressionEvaluationContextFactory.apply(terminalContext);
+                    }
+                    return this.terminalExpressionEvaluationContext;
+                }
+
+                private TerminalExpressionEvaluationContext terminalExpressionEvaluationContext;
 
                 @Override
                 public Optional<EmailAddress> user() {

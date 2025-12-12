@@ -23,6 +23,7 @@ import walkingkooka.io.TextReaders;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
+import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.text.HasLineEnding;
 import walkingkooka.text.printer.Printer;
 import walkingkooka.text.printer.Printers;
@@ -35,6 +36,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A {@link TerminalContext} for Apache SSHD.
@@ -46,14 +48,16 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
                                                 final OutputStream out,
                                                 final OutputStream err,
                                                 final Runnable closeSession,
-                                                final EnvironmentContext environmentContext) {
+                                                final EnvironmentContext environmentContext,
+                                                final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         return new ApacheSshdServerTerminalContext(
             Objects.requireNonNull(terminalId, "terminalId"),
             Objects.requireNonNull(in, "in"),
             Objects.requireNonNull(out, "out"),
             Objects.requireNonNull(err, "err"),
             Objects.requireNonNull(closeSession, "closeSession"),
-            Objects.requireNonNull(environmentContext, "environmentContext")
+            Objects.requireNonNull(environmentContext, "environmentContext"),
+            Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory")
         );
     }
 
@@ -62,7 +66,8 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
                                             final OutputStream out,
                                             final OutputStream err,
                                             final Runnable closeSession,
-                                            final EnvironmentContext environmentContext) {
+                                            final EnvironmentContext environmentContext,
+                                            final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         super();
 
         this.terminalId = terminalId;
@@ -84,6 +89,8 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
 
         this.closeSession = closeSession;
         this.environmentContext = environmentContext;
+
+        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
     }
 
     private static Printer printer(final OutputStream outputStream,
@@ -150,6 +157,14 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
     }
 
     private final Printer error;
+
+    @Override
+    public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {
+        this.openChecker.check();
+        return this.expressionEvaluationContextFactory.apply(this);
+    }
+
+    private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 
     private final OpenChecker<IllegalStateException> openChecker = OpenChecker.with(
         "Terminal closed",

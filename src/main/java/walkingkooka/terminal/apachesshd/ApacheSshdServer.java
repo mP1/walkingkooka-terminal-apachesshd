@@ -26,8 +26,10 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.environment.EnvironmentContexts;
 import walkingkooka.net.IpPort;
+import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalContexts;
 import walkingkooka.terminal.TerminalId;
+import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.server.TerminalServerContexts;
 import walkingkooka.terminal.shell.TerminalShell;
@@ -44,6 +46,7 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Starts a Apache MINA SSHD server using a provided {@link TerminalServerContext} to create terminal sessions.
@@ -54,6 +57,7 @@ public final class ApacheSshdServer {
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
                                         final TerminalShell terminalShell,
+                                        final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
         return new ApacheSshdServer(
@@ -61,6 +65,7 @@ public final class ApacheSshdServer {
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
             Objects.requireNonNull(publicKeyAuthenticator, "publicKeyAuthenticator"),
             Objects.requireNonNull(terminalShell, "terminalShell"),
+            Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory"),
             Objects.requireNonNull(environmentContext, "environmentContext"),
             Objects.requireNonNull(terminalServerContext, "terminalServerContext")
         );
@@ -70,6 +75,7 @@ public final class ApacheSshdServer {
                              final BiFunction<String, String, Boolean> passwordAuthenticator,
                              final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
                              final TerminalShell terminalShell,
+                             final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                              final EnvironmentContext environmentContext,
                              final TerminalServerContext terminalServerContext) {
         this.port = port;
@@ -77,6 +83,7 @@ public final class ApacheSshdServer {
         this.publicKeyAuthenticator = publicKeyAuthenticator;
 
         this.terminalShell = terminalShell;
+        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
 
         this.environmentContext = environmentContext;
         this.terminalServerContext = terminalServerContext;
@@ -92,6 +99,7 @@ public final class ApacheSshdServer {
         sshd.setShellFactory(
             (ChannelSession channel) -> ApacheSshdServerShellCommand.with(
                 this.terminalShell,
+                this.expressionEvaluationContextFactory,
                 this.terminalServerContext,
                 this.environmentContext
             )
@@ -130,6 +138,9 @@ public final class ApacheSshdServer {
     private final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator;
 
     private final TerminalShell terminalShell;
+
+    private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
+
     /**
      * The template {@link EnvironmentContext} which shouldnt have a user, but has the system locale.
      */
@@ -163,6 +174,9 @@ public final class ApacheSshdServer {
             (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
             TerminalShells.basic(50), //shell
+            (t) -> {
+                throw new UnsupportedOperationException();
+            },
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
                     LineEnding.NL,
