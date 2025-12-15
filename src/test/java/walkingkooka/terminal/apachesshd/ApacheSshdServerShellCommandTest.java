@@ -17,18 +17,8 @@
 
 package walkingkooka.terminal.apachesshd;
 
-import walkingkooka.environment.EnvironmentContext;
-import walkingkooka.environment.EnvironmentContexts;
 import walkingkooka.reflect.ClassTesting2;
 import walkingkooka.reflect.JavaVisibility;
-import walkingkooka.terminal.TerminalContextTesting;
-import walkingkooka.terminal.TerminalId;
-import walkingkooka.text.LineEnding;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.Locale;
 
 public final class ApacheSshdServerShellCommandTest implements ClassTesting2<ApacheSshdServerShellCommand> {
 
