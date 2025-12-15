@@ -27,16 +27,12 @@ import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.session.ServerSessionAware;
 import org.apache.sshd.server.session.ServerSessionHolder;
 import walkingkooka.environment.EnvironmentContext;
-import walkingkooka.io.TextReader;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.terminal.server.TerminalServerContext;
-import walkingkooka.terminal.shell.TerminalShell;
-import walkingkooka.terminal.shell.TerminalShellContext;
 import walkingkooka.text.LineEnding;
-import walkingkooka.text.printer.Printer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,8 +42,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A {@link Command} that prepares a new shell instance using the provided {@link TerminalShellContext} to eventually
- * execute entered commands.
+ * A {@link Command} that creates a new {@link TerminalExpressionEvaluationContext} assuming that starts a shell.
  */
 final class ApacheSshdServerShellCommand implements Command,
     ServerChannelSessionHolder,
