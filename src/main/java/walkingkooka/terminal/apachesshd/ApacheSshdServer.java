@@ -25,16 +25,20 @@ import org.apache.sshd.server.forward.AcceptAllForwardingFilter;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.environment.EnvironmentContexts;
+import walkingkooka.io.TextReader;
 import walkingkooka.net.IpPort;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalContexts;
 import walkingkooka.terminal.TerminalId;
+import walkingkooka.terminal.expression.FakeTerminalExpressionEvaluationContext;
 import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.server.TerminalServerContexts;
 import walkingkooka.terminal.shell.TerminalShell;
 import walkingkooka.terminal.shell.TerminalShells;
+import walkingkooka.text.CharSequences;
 import walkingkooka.text.LineEnding;
+import walkingkooka.text.printer.Printer;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -56,7 +60,6 @@ public final class ApacheSshdServer {
     public static ApacheSshdServer with(final IpPort port,
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
-                                        final TerminalShell terminalShell,
                                         final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
@@ -64,7 +67,6 @@ public final class ApacheSshdServer {
             Objects.requireNonNull(port, "port"),
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
             Objects.requireNonNull(publicKeyAuthenticator, "publicKeyAuthenticator"),
-            Objects.requireNonNull(terminalShell, "terminalShell"),
             Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory"),
             Objects.requireNonNull(environmentContext, "environmentContext"),
             Objects.requireNonNull(terminalServerContext, "terminalServerContext")
@@ -74,7 +76,6 @@ public final class ApacheSshdServer {
     private ApacheSshdServer(final IpPort port,
                              final BiFunction<String, String, Boolean> passwordAuthenticator,
                              final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
-                             final TerminalShell terminalShell,
                              final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                              final EnvironmentContext environmentContext,
                              final TerminalServerContext terminalServerContext) {
@@ -82,7 +83,6 @@ public final class ApacheSshdServer {
         this.passwordAuthenticator = passwordAuthenticator;
         this.publicKeyAuthenticator = publicKeyAuthenticator;
 
-        this.terminalShell = terminalShell;
         this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
 
         this.environmentContext = environmentContext;
@@ -98,7 +98,6 @@ public final class ApacheSshdServer {
 
         sshd.setShellFactory(
             (ChannelSession channel) -> ApacheSshdServerShellCommand.with(
-                this.terminalShell,
                 this.expressionEvaluationContextFactory,
                 this.terminalServerContext,
                 this.environmentContext
@@ -137,8 +136,6 @@ public final class ApacheSshdServer {
 
     private final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator;
 
-    private final TerminalShell terminalShell;
-
     private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 
     /**
@@ -173,9 +170,76 @@ public final class ApacheSshdServer {
             IpPort.with(2000),
             (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
-            TerminalShells.basic(50), //shell
-            (t) -> {
-                throw new UnsupportedOperationException();
+            (final TerminalContext t) -> new FakeTerminalExpressionEvaluationContext() {
+                @Override
+                public boolean isTerminalOpen() {
+                    return t.isTerminalOpen();
+                }
+
+                @Override
+                public Object evaluate(final String expression) {
+                    Objects.requireNonNull(expression, "expression");
+
+                    final TextReader input = this.input();
+                    final Printer printer = this.output();
+
+                    String e = expression;
+
+                    while(this.isTerminalOpen()) {
+                        if(null != e) {
+                            System.out.println();
+                            System.out.println(
+                                "input: " + CharSequences.quoteAndEscape(e)
+                            );
+
+                            switch (e) {
+                                case "":
+                                    printer.println("Exiting...");
+                                    this.exitTerminal();
+                                    printer.println("isTerminalOpen: " + this.isTerminalOpen());
+                                    break;
+                                default:
+                                    printer.println("echo: " + e);
+                                    printer.println("echo: " + e);
+                                    printer.flush();
+                                    break;
+                            }
+                        } else {
+                            System.out.print(".");
+                        }
+
+                        e = input.readLine(50)
+                            .orElse(null);
+                    }
+
+                    return null;
+                }
+
+                @Override
+                public TerminalExpressionEvaluationContext exitTerminal() {
+                    t.exitTerminal();
+                    return this;
+                }
+
+                @Override
+                public TextReader input() {
+                    return t.input();
+                }
+
+                @Override
+                public Printer output() {
+                    return t.output();
+                }
+
+                @Override
+                public Printer error() {
+                    return t.error();
+                }
+
+                @Override
+                public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {
+                    throw new UnsupportedOperationException();
+                }
             },
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(

@@ -55,24 +55,20 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerSessionHolder,
     SessionHolder<ServerSession> {
 
-    static ApacheSshdServerShellCommand with(final TerminalShell terminalShell,
-                                             final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    static ApacheSshdServerShellCommand with(final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                              final TerminalServerContext terminalServerContext,
                                              final EnvironmentContext environmentContext) {
         return new ApacheSshdServerShellCommand(
-            terminalShell,
             expressionEvaluationContextFactory,
             terminalServerContext,
             environmentContext
         );
     }
 
-    private ApacheSshdServerShellCommand(final TerminalShell terminalShell,
-                                         final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    private ApacheSshdServerShellCommand(final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                          final TerminalServerContext terminalServerContext,
                                          final EnvironmentContext environmentContext) {
         super();
-        this.terminalShell = terminalShell;
         this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
         this.terminalServerContext = terminalServerContext;
         this.environmentContext = environmentContext;
@@ -145,7 +141,8 @@ final class ApacheSshdServerShellCommand implements Command,
             this.terminalContext = terminalContext;
 
             new Thread(
-                () -> shell(terminalContext)
+                () -> terminalContext.terminalExpressionEvaluationContext()
+                    .evaluate("shell")
             ).start();
         }
     }
@@ -177,70 +174,6 @@ final class ApacheSshdServerShellCommand implements Command,
     private final EnvironmentContext environmentContext;
 
     private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
-    /**
-     * Begins a shell which will continue to consume lines of text and evaluate each complete line or multi-line of text.
-     * @param terminalContext
-     */
-    private void shell(final TerminalContext terminalContext) {
-        this.terminalShell.start(
-            new TerminalShellContext() {
-                @Override
-                public void evaluate(final String text) {
-                    final Printer output = this.output();
-                    output.println("evaluate: " + text);
-                    output.println("evaluate: " + text);
-                    output.flush();
-                }
-
-                @Override
-                public TerminalId terminalId() {
-                    return terminalContext.terminalId();
-                }
-
-                @Override
-                public TerminalContext exitTerminal() {
-                    return terminalContext.exitTerminal();
-                }
-
-                @Override
-                public boolean isTerminalOpen() {
-                    return terminalContext.isTerminalOpen();
-                }
-
-                @Override
-                public TextReader input() {
-                    return terminalContext.input();
-                }
-
-                @Override
-                public Printer output() {
-                    return terminalContext.output();
-                }
-
-                @Override
-                public Printer error() {
-                    return terminalContext.error();
-                }
-
-                @Override
-                public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {
-                    if(null == this.terminalExpressionEvaluationContext) {
-                        this.terminalExpressionEvaluationContext = ApacheSshdServerShellCommand.this.expressionEvaluationContextFactory.apply(terminalContext);
-                    }
-                    return this.terminalExpressionEvaluationContext;
-                }
-
-                private TerminalExpressionEvaluationContext terminalExpressionEvaluationContext;
-
-                @Override
-                public Optional<EmailAddress> user() {
-                    return terminalContext.user();
-                }
-            }
-        );
-    }
-
-    private final TerminalShell terminalShell;
 
     @Override
     public void destroy(final ChannelSession channel) {
