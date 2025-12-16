@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -51,7 +52,7 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerSessionHolder,
     SessionHolder<ServerSession> {
 
-    static ApacheSshdServerShellCommand with(final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    static ApacheSshdServerShellCommand with(final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                              final TerminalServerContext terminalServerContext,
                                              final EnvironmentContext environmentContext) {
         return new ApacheSshdServerShellCommand(
@@ -61,7 +62,7 @@ final class ApacheSshdServerShellCommand implements Command,
         );
     }
 
-    private ApacheSshdServerShellCommand(final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    private ApacheSshdServerShellCommand(final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                          final TerminalServerContext terminalServerContext,
                                          final EnvironmentContext environmentContext) {
         super();
@@ -180,7 +181,7 @@ final class ApacheSshdServerShellCommand implements Command,
 
     private final EnvironmentContext environmentContext;
 
-    private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
+    private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 
     @Override
     public void destroy(final ChannelSession channel) {

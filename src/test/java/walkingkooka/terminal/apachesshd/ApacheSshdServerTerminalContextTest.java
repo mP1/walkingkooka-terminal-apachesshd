@@ -19,6 +19,7 @@ package walkingkooka.terminal.apachesshd;
 
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.environment.EnvironmentContexts;
+import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalContextTesting;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.text.LineEnding;
@@ -49,7 +50,8 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
                 LocalDateTime::now,
                 EnvironmentContext.ANONYMOUS
             ),
-            (c) -> {
+            (final TerminalContext terminalContext,
+             final EnvironmentContext environmentContext) -> {
                 throw new UnsupportedOperationException();
             }
         );

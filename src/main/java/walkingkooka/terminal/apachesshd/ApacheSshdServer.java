@@ -57,7 +57,7 @@ public final class ApacheSshdServer {
     public static ApacheSshdServer with(final IpPort port,
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
-                                        final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+                                        final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
         return new ApacheSshdServer(
@@ -73,7 +73,7 @@ public final class ApacheSshdServer {
     private ApacheSshdServer(final IpPort port,
                              final BiFunction<String, String, Boolean> passwordAuthenticator,
                              final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
-                             final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+                             final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                              final EnvironmentContext environmentContext,
                              final TerminalServerContext terminalServerContext) {
         this.port = port;
@@ -133,7 +133,7 @@ public final class ApacheSshdServer {
 
     private final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator;
 
-    private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
+    private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 
     /**
      * The template {@link EnvironmentContext} which shouldnt have a user, but has the system locale.
@@ -167,7 +167,7 @@ public final class ApacheSshdServer {
             IpPort.with(2000),
             (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
-            (final TerminalContext t) -> new FakeTerminalExpressionEvaluationContext() {
+            (final TerminalContext t, final EnvironmentContext e) -> new FakeTerminalExpressionEvaluationContext() {
                 @Override
                 public boolean isTerminalOpen() {
                     return t.isTerminalOpen();
