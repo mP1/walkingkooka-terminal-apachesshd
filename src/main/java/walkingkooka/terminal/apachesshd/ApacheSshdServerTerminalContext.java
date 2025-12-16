@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -49,7 +50,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
                                                 final OutputStream err,
                                                 final Runnable closeSession,
                                                 final EnvironmentContext environmentContext,
-                                                final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
+                                                final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         return new ApacheSshdServerTerminalContext(
             Objects.requireNonNull(terminalId, "terminalId"),
             Objects.requireNonNull(in, "in"),
@@ -67,7 +68,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
                                             final OutputStream err,
                                             final Runnable closeSession,
                                             final EnvironmentContext environmentContext,
-                                            final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
+                                            final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         super();
 
         this.terminalId = terminalId;
@@ -161,10 +162,13 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
     @Override
     public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {
         this.openChecker.check();
-        return this.expressionEvaluationContextFactory.apply(this);
+        return this.expressionEvaluationContextFactory.apply(
+            this,
+            this.environmentContext
+        );
     }
 
-    private final Function<TerminalContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
+    private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 
     private final OpenChecker<IllegalStateException> openChecker = OpenChecker.with(
         "Terminal closed",
