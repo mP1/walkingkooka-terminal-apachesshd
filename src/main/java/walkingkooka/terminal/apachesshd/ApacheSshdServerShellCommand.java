@@ -32,6 +32,7 @@ import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.terminal.server.TerminalServerContext;
+import walkingkooka.text.CharSequences;
 import walkingkooka.text.LineEnding;
 
 import java.io.IOException;
@@ -114,7 +115,7 @@ final class ApacheSshdServerShellCommand implements Command,
                 message = cause.getMessage();
             }
         } else {
-            message = "Missing user from environment";
+            message = "Missing " + CharSequences.quoteAndEscape(Environment.ENV_USER) + " from environment";
         }
 
         if (null != message) {
