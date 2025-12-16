@@ -136,7 +136,7 @@ final class ApacheSshdServerShellCommand implements Command,
             );
             this.terminalContext = terminalContext;
 
-            new Thread(
+            final Thread thread = new Thread(
                 () -> {
                     TerminalExpressionEvaluationContext terminalExpressionEvaluationContext = null;
                     try {
@@ -148,7 +148,9 @@ final class ApacheSshdServerShellCommand implements Command,
                         }
                     }
                 }
-            ).start();
+            );
+            thread.setName(TerminalContext.class.getSimpleName() + "-shell-" + terminalContext.terminalId());
+            thread.start();
         }
     }
 
