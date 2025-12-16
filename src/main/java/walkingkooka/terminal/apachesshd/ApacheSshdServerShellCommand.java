@@ -137,8 +137,17 @@ final class ApacheSshdServerShellCommand implements Command,
             this.terminalContext = terminalContext;
 
             new Thread(
-                () -> terminalContext.terminalExpressionEvaluationContext()
-                    .evaluate("shell")
+                () -> {
+                    TerminalExpressionEvaluationContext terminalExpressionEvaluationContext = null;
+                    try {
+                        terminalExpressionEvaluationContext = terminalContext.terminalExpressionEvaluationContext();
+                        terminalExpressionEvaluationContext.evaluate("shell");
+                    } finally {
+                        if (null != terminalExpressionEvaluationContext && terminalExpressionEvaluationContext.isTerminalOpen()) {
+                            terminalExpressionEvaluationContext.exitTerminal();
+                        }
+                    }
+                }
             ).start();
         }
     }
