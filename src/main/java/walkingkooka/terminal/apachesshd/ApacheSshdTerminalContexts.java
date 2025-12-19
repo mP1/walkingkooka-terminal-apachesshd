@@ -39,6 +39,7 @@ public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
                                              final OutputStream err,
                                              final Runnable closeSession,
                                              final EnvironmentContext environmentContext,
+                                             final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
                                              final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         return ApacheSshdServerTerminalContext.with(
             terminalId,
@@ -47,6 +48,7 @@ public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
             err,
             closeSession,
             environmentContext,
+            evaluator,
             expressionEvaluationContextFactory
         );
     }

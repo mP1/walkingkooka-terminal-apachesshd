@@ -50,6 +50,10 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
                 LocalDateTime::now,
                 EnvironmentContext.ANONYMOUS
             ),
+            (final String expression,
+             final TerminalContext terminalContext) -> {
+                throw new UnsupportedOperationException();
+            },
             (final TerminalContext terminalContext,
              final EnvironmentContext environmentContext) -> {
                 throw new UnsupportedOperationException();
