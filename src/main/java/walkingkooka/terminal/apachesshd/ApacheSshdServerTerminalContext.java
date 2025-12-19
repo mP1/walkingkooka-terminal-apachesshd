@@ -50,6 +50,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
                                                 final OutputStream err,
                                                 final Runnable closeSession,
                                                 final EnvironmentContext environmentContext,
+                                                final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
                                                 final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         return new ApacheSshdServerTerminalContext(
             Objects.requireNonNull(terminalId, "terminalId"),
@@ -58,6 +59,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
             Objects.requireNonNull(err, "err"),
             Objects.requireNonNull(closeSession, "closeSession"),
             Objects.requireNonNull(environmentContext, "environmentContext"),
+            Objects.requireNonNull(evaluator, "evaluator"),
             Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory")
         );
     }
@@ -68,6 +70,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
                                             final OutputStream err,
                                             final Runnable closeSession,
                                             final EnvironmentContext environmentContext,
+                                            final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
                                             final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
         super();
 
@@ -90,6 +93,8 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
 
         this.closeSession = closeSession;
         this.environmentContext = environmentContext;
+
+        this.evaluator = evaluator;
 
         this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
     }
@@ -158,6 +163,19 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
     }
 
     private final Printer error;
+
+    @Override
+    public Object evaluate(final String expression) {
+        Objects.requireNonNull(expression, "expression");
+
+        this.openChecker.check();
+        return this.evaluator.apply(
+            expression,
+            this
+        );
+    }
+
+    private final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator;
 
     @Override
     public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {

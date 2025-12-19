@@ -52,20 +52,24 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerSessionHolder,
     SessionHolder<ServerSession> {
 
-    static ApacheSshdServerShellCommand with(final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    static ApacheSshdServerShellCommand with(final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
+                                             final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                              final TerminalServerContext terminalServerContext,
                                              final EnvironmentContext environmentContext) {
         return new ApacheSshdServerShellCommand(
+            evaluator,
             expressionEvaluationContextFactory,
             terminalServerContext,
             environmentContext
         );
     }
 
-    private ApacheSshdServerShellCommand(final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    private ApacheSshdServerShellCommand(final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
+                                         final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                          final TerminalServerContext terminalServerContext,
                                          final EnvironmentContext environmentContext) {
         super();
+        this.evaluator = evaluator;
         this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
         this.terminalServerContext = terminalServerContext;
         this.environmentContext = environmentContext;
@@ -173,6 +177,7 @@ final class ApacheSshdServerShellCommand implements Command,
                 .setUser(
                     Optional.of(user)
                 ).setLineEnding(LineEnding.CRNL),
+            this.evaluator,
             this.expressionEvaluationContextFactory
         );
     }
@@ -180,6 +185,8 @@ final class ApacheSshdServerShellCommand implements Command,
     private final TerminalServerContext terminalServerContext;
 
     private final EnvironmentContext environmentContext;
+
+    private final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator;
 
     private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 

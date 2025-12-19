@@ -57,6 +57,7 @@ public final class ApacheSshdServer {
     public static ApacheSshdServer with(final IpPort port,
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
+                                        final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
                                         final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
@@ -64,6 +65,7 @@ public final class ApacheSshdServer {
             Objects.requireNonNull(port, "port"),
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
             Objects.requireNonNull(publicKeyAuthenticator, "publicKeyAuthenticator"),
+            Objects.requireNonNull(evaluator, "evaluator"),
             Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory"),
             Objects.requireNonNull(environmentContext, "environmentContext"),
             Objects.requireNonNull(terminalServerContext, "terminalServerContext")
@@ -73,12 +75,15 @@ public final class ApacheSshdServer {
     private ApacheSshdServer(final IpPort port,
                              final BiFunction<String, String, Boolean> passwordAuthenticator,
                              final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
+                             final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
                              final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
                              final EnvironmentContext environmentContext,
                              final TerminalServerContext terminalServerContext) {
         this.port = port;
         this.passwordAuthenticator = passwordAuthenticator;
         this.publicKeyAuthenticator = publicKeyAuthenticator;
+
+        this.evaluator = evaluator;
 
         this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
 
@@ -95,6 +100,7 @@ public final class ApacheSshdServer {
 
         sshd.setShellFactory(
             (ChannelSession channel) -> ApacheSshdServerShellCommand.with(
+                this.evaluator,
                 this.expressionEvaluationContextFactory,
                 this.terminalServerContext,
                 this.environmentContext
@@ -133,6 +139,8 @@ public final class ApacheSshdServer {
 
     private final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator;
 
+    private final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator;
+
     private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 
     /**
@@ -167,6 +175,9 @@ public final class ApacheSshdServer {
             IpPort.with(2000),
             (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
+            (final String expression, final TerminalContext c) -> {
+                throw new UnsupportedOperationException();
+            },
             (final TerminalContext t, final EnvironmentContext e) -> new FakeTerminalExpressionEvaluationContext() {
                 @Override
                 public boolean isTerminalOpen() {
