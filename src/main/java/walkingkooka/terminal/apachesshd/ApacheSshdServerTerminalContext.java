@@ -18,6 +18,8 @@
 package walkingkooka.terminal.apachesshd;
 
 import walkingkooka.environment.EnvironmentContext;
+import walkingkooka.environment.EnvironmentContextDelegator;
+import walkingkooka.environment.EnvironmentValueName;
 import walkingkooka.io.TextReader;
 import walkingkooka.io.TextReaders;
 import walkingkooka.net.email.EmailAddress;
@@ -25,6 +27,7 @@ import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.text.HasLineEnding;
+import walkingkooka.text.LineEnding;
 import walkingkooka.text.printer.Printer;
 import walkingkooka.text.printer.Printers;
 import walkingkooka.util.OpenChecker;
@@ -34,15 +37,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * A {@link TerminalContext} for Apache SSHD.
  */
-final class ApacheSshdServerTerminalContext implements TerminalContext {
+final class ApacheSshdServerTerminalContext implements TerminalContext,
+    EnvironmentContextDelegator {
 
     static ApacheSshdServerTerminalContext with(final TerminalId terminalId,
                                                 final InputStream in,
@@ -52,51 +56,43 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
                                                 final EnvironmentContext environmentContext,
                                                 final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
                                                 final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
-        return new ApacheSshdServerTerminalContext(
-            Objects.requireNonNull(terminalId, "terminalId"),
-            Objects.requireNonNull(in, "in"),
-            Objects.requireNonNull(out, "out"),
-            Objects.requireNonNull(err, "err"),
-            Objects.requireNonNull(closeSession, "closeSession"),
-            Objects.requireNonNull(environmentContext, "environmentContext"),
-            Objects.requireNonNull(evaluator, "evaluator"),
-            Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory")
-        );
-    }
+        Objects.requireNonNull(terminalId, "terminalId");
+        Objects.requireNonNull(in, "in");
+        Objects.requireNonNull(out, "out");
+        Objects.requireNonNull(err, "err");
+        Objects.requireNonNull(closeSession, "closeSession");
+        Objects.requireNonNull(environmentContext, "environmentContext");
+        Objects.requireNonNull(evaluator, "evaluator");
+        Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory");
 
-    private ApacheSshdServerTerminalContext(final TerminalId terminalId,
-                                            final InputStream in,
-                                            final OutputStream out,
-                                            final OutputStream err,
-                                            final Runnable closeSession,
-                                            final EnvironmentContext environmentContext,
-                                            final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
-                                            final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
-        super();
-
-        this.terminalId = terminalId;
-
-        this.input = TextReaders.reader(
-            new InputStreamReader(in),
-            this::echo
-        );
-
-        this.output = printer(
+        final Printer output = printer(
             out,
             environmentContext
         );
 
-        this.error = printer(
-            err,
-            environmentContext
+        return new ApacheSshdServerTerminalContext(
+            terminalId,
+            TextReaders.reader(
+                new InputStreamReader(in),
+                (Character c) -> {
+                    output.print(c.toString());
+                    output.flush(); // flush required!
+                }
+            ),
+            output,
+            printer(
+                err,
+                environmentContext
+            ),
+            closeSession,
+            OpenChecker.with(
+                "Terminal closed",
+                (String message) -> new IllegalStateException(message)
+            ),
+            environmentContext,
+            evaluator,
+            expressionEvaluationContextFactory
         );
-
-        this.closeSession = closeSession;
-        this.environmentContext = environmentContext;
-
-        this.evaluator = evaluator;
-
-        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
     }
 
     private static Printer printer(final OutputStream outputStream,
@@ -109,10 +105,32 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
         );
     }
 
-    private void echo(final Character c) {
-        final Printer printer = this.output;
-        printer.print(c.toString());
-        printer.flush(); // flush required!
+    private ApacheSshdServerTerminalContext(final TerminalId terminalId,
+                                            final TextReader input,
+                                            final Printer output,
+                                            final Printer error,
+                                            final Runnable closeSession,
+                                            final OpenChecker<IllegalStateException> openChecker,
+                                            final EnvironmentContext environmentContext,
+                                            final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
+                                            final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
+        super();
+
+        this.terminalId = terminalId;
+
+        this.input = input;
+        this.output = output;
+
+        this.error = error;
+
+        this.closeSession = closeSession;
+        this.openChecker = openChecker;
+
+        this.environmentContext = environmentContext;
+
+        this.evaluator = evaluator;
+
+        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
     }
 
     // TerminalContext..................................................................................................
@@ -188,16 +206,79 @@ final class ApacheSshdServerTerminalContext implements TerminalContext {
 
     private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
 
-    private final OpenChecker<IllegalStateException> openChecker = OpenChecker.with(
-        "Terminal closed",
-        (String message) -> new IllegalStateException(message)
-    );
+    private final OpenChecker<IllegalStateException> openChecker;
 
     // EnvironmentContext...............................................................................................
 
     @Override
-    public Optional<EmailAddress> user() {
-        return this.environmentContext.user();
+    public TerminalContext cloneEnvironment() {
+        return this.setEnvironmentContext(
+            this.environmentContext.cloneEnvironment()
+        );
+    }
+
+    @Override
+    public TerminalContext setEnvironmentContext(final EnvironmentContext context) {
+        final EnvironmentContext before = this.environmentContext;
+        final EnvironmentContext after = before.setEnvironmentContext(context);
+
+        return before == after ?
+            this :
+            new ApacheSshdServerTerminalContext(
+                this.terminalId,
+                this.input,
+                this.output,
+                this.error,
+                this.closeSession,
+                this.openChecker,
+                Objects.requireNonNull(after, "context"), // EnvironmentContext
+                this.evaluator,
+                this.expressionEvaluationContextFactory
+            );
+    }
+
+    @Override
+    public <T> TerminalContext setEnvironmentValue(final EnvironmentValueName<T> name,
+                                                   final T value) {
+        this.environmentContext()
+            .setEnvironmentValue(
+                name,
+                value
+            );
+        return this;
+    }
+
+    @Override
+    public TerminalContext removeEnvironmentValue(final EnvironmentValueName<?> name) {
+        this.environmentContext()
+            .removeEnvironmentValue(name);
+        return this;
+    }
+
+    @Override
+    public TerminalContext setLineEnding(final LineEnding lineEnding) {
+        this.environmentContext()
+            .setLineEnding(lineEnding);
+        return this;
+    }
+
+    @Override
+    public TerminalContext setLocale(final Locale locale) {
+        this.environmentContext()
+            .setLocale(locale);
+        return this;
+    }
+
+    @Override
+    public TerminalContext setUser(final Optional<EmailAddress> user) {
+        this.environmentContext()
+            .setUser(user);
+        return this;
+    }
+
+    @Override
+    public EnvironmentContext environmentContext() {
+        return this.environmentContext;
     }
 
     private final EnvironmentContext environmentContext;
