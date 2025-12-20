@@ -57,8 +57,7 @@ public final class ApacheSshdServer {
     public static ApacheSshdServer with(final IpPort port,
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
-                                        final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
-                                        final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+                                        final BiFunction<String, TerminalContext, Object> evaluator,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
         return new ApacheSshdServer(
@@ -66,7 +65,6 @@ public final class ApacheSshdServer {
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
             Objects.requireNonNull(publicKeyAuthenticator, "publicKeyAuthenticator"),
             Objects.requireNonNull(evaluator, "evaluator"),
-            Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory"),
             Objects.requireNonNull(environmentContext, "environmentContext"),
             Objects.requireNonNull(terminalServerContext, "terminalServerContext")
         );
@@ -75,8 +73,7 @@ public final class ApacheSshdServer {
     private ApacheSshdServer(final IpPort port,
                              final BiFunction<String, String, Boolean> passwordAuthenticator,
                              final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
-                             final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
-                             final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+                             final BiFunction<String, TerminalContext, Object> evaluator,
                              final EnvironmentContext environmentContext,
                              final TerminalServerContext terminalServerContext) {
         this.port = port;
@@ -84,8 +81,6 @@ public final class ApacheSshdServer {
         this.publicKeyAuthenticator = publicKeyAuthenticator;
 
         this.evaluator = evaluator;
-
-        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
 
         this.environmentContext = environmentContext;
         this.terminalServerContext = terminalServerContext;
@@ -101,7 +96,6 @@ public final class ApacheSshdServer {
         sshd.setShellFactory(
             (ChannelSession channel) -> ApacheSshdServerShellCommand.with(
                 this.evaluator,
-                this.expressionEvaluationContextFactory,
                 this.terminalServerContext,
                 this.environmentContext
             )
@@ -139,9 +133,7 @@ public final class ApacheSshdServer {
 
     private final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator;
 
-    private final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator;
-
-    private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
+    private final BiFunction<String, TerminalContext, Object> evaluator;
 
     /**
      * The template {@link EnvironmentContext} which shouldnt have a user, but has the system locale.
@@ -175,79 +167,43 @@ public final class ApacheSshdServer {
             IpPort.with(2000),
             (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
-            (final String expression, final TerminalContext c) -> {
-                throw new UnsupportedOperationException();
-            },
-            (final TerminalContext t, final EnvironmentContext e) -> new FakeTerminalExpressionEvaluationContext() {
-                @Override
-                public boolean isTerminalOpen() {
-                    return t.isTerminalOpen();
-                }
+            (final String expression, 
+             final TerminalContext terminalContext) -> {
+                Objects.requireNonNull(expression, "expression");
 
-                @Override
-                public Object evaluate(final String expression) {
-                    Objects.requireNonNull(expression, "expression");
+                final TextReader input = terminalContext.input();
+                final Printer printer = terminalContext.output();
 
-                    final TextReader input = this.input();
-                    final Printer printer = this.output();
+                String e = expression;
 
-                    String e = expression;
+                while(terminalContext.isTerminalOpen()) {
+                    if(null != e) {
+                        System.out.println();
+                        System.out.println(
+                            "input: " + CharSequences.quoteAndEscape(e)
+                        );
 
-                    while(this.isTerminalOpen()) {
-                        if(null != e) {
-                            System.out.println();
-                            System.out.println(
-                                "input: " + CharSequences.quoteAndEscape(e)
-                            );
-
-                            switch (e) {
-                                case "":
-                                    printer.println("Exiting...");
-                                    this.exitTerminal();
-                                    printer.println("isTerminalOpen: " + this.isTerminalOpen());
-                                    break;
-                                default:
-                                    printer.println("echo: " + e);
-                                    printer.println("echo: " + e);
-                                    printer.flush();
-                                    break;
-                            }
-                        } else {
-                            System.out.print(".");
+                        switch (e) {
+                            case "":
+                                printer.println("Exiting...");
+                                terminalContext.exitTerminal();
+                                printer.println("isTerminalOpen: " + terminalContext.isTerminalOpen());
+                                break;
+                            default:
+                                printer.println("echo: " + e);
+                                printer.println("echo: " + e);
+                                printer.flush();
+                                break;
                         }
-
-                        e = input.readLine(50)
-                            .orElse(null);
+                    } else {
+                        System.out.print(".");
                     }
 
-                    return null;
+                    e = input.readLine(50)
+                        .orElse(null);
                 }
 
-                @Override
-                public TerminalExpressionEvaluationContext exitTerminal() {
-                    t.exitTerminal();
-                    return this;
-                }
-
-                @Override
-                public TextReader input() {
-                    return t.input();
-                }
-
-                @Override
-                public Printer output() {
-                    return t.output();
-                }
-
-                @Override
-                public Printer error() {
-                    return t.error();
-                }
-
-                @Override
-                public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {
-                    throw new UnsupportedOperationException();
-                }
+                return 0;
             },
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(

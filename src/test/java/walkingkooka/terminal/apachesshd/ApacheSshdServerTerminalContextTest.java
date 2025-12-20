@@ -53,10 +53,6 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
             (final String expression,
              final TerminalContext terminalContext) -> {
                 throw new UnsupportedOperationException();
-            },
-            (final TerminalContext terminalContext,
-             final EnvironmentContext environmentContext) -> {
-                throw new UnsupportedOperationException();
             }
         );
     }

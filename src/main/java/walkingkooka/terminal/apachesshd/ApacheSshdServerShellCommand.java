@@ -52,25 +52,21 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerSessionHolder,
     SessionHolder<ServerSession> {
 
-    static ApacheSshdServerShellCommand with(final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
-                                             final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    static ApacheSshdServerShellCommand with(final BiFunction<String, TerminalContext, Object> evaluator,
                                              final TerminalServerContext terminalServerContext,
                                              final EnvironmentContext environmentContext) {
         return new ApacheSshdServerShellCommand(
             evaluator,
-            expressionEvaluationContextFactory,
             terminalServerContext,
             environmentContext
         );
     }
 
-    private ApacheSshdServerShellCommand(final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
-                                         final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory,
+    private ApacheSshdServerShellCommand(final BiFunction<String, TerminalContext, Object> evaluator,
                                          final TerminalServerContext terminalServerContext,
                                          final EnvironmentContext environmentContext) {
         super();
         this.evaluator = evaluator;
-        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
         this.terminalServerContext = terminalServerContext;
         this.environmentContext = environmentContext;
     }
@@ -142,17 +138,7 @@ final class ApacheSshdServerShellCommand implements Command,
             this.terminalContext = terminalContext;
 
             final Thread thread = new Thread(
-                () -> {
-                    TerminalExpressionEvaluationContext terminalExpressionEvaluationContext = null;
-                    try {
-                        terminalExpressionEvaluationContext = terminalContext.terminalExpressionEvaluationContext();
-                        terminalExpressionEvaluationContext.evaluate("shell");
-                    } finally {
-                        if (null != terminalExpressionEvaluationContext && terminalExpressionEvaluationContext.isTerminalOpen()) {
-                            terminalExpressionEvaluationContext.exitTerminal();
-                        }
-                    }
-                }
+                () -> terminalContext.evaluate("shell")
             );
             thread.setName(TerminalContext.class.getSimpleName() + "-shell-" + terminalContext.terminalId());
             thread.start();
@@ -177,8 +163,7 @@ final class ApacheSshdServerShellCommand implements Command,
                 .setUser(
                     Optional.of(user)
                 ).setLineEnding(LineEnding.CRNL),
-            this.evaluator,
-            this.expressionEvaluationContextFactory
+            this.evaluator
         );
     }
 
@@ -186,9 +171,7 @@ final class ApacheSshdServerShellCommand implements Command,
 
     private final EnvironmentContext environmentContext;
 
-    private final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator;
-
-    private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
+    private final BiFunction<String, TerminalContext, Object> evaluator;
 
     @Override
     public void destroy(final ChannelSession channel) {

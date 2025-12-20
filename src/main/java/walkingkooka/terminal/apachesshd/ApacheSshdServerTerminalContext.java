@@ -54,8 +54,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                                                 final OutputStream err,
                                                 final Runnable closeSession,
                                                 final EnvironmentContext environmentContext,
-                                                final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
-                                                final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
+                                                final BiFunction<String, TerminalContext, Object> evaluator) {
         Objects.requireNonNull(terminalId, "terminalId");
         Objects.requireNonNull(in, "in");
         Objects.requireNonNull(out, "out");
@@ -63,7 +62,6 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
         Objects.requireNonNull(closeSession, "closeSession");
         Objects.requireNonNull(environmentContext, "environmentContext");
         Objects.requireNonNull(evaluator, "evaluator");
-        Objects.requireNonNull(expressionEvaluationContextFactory, "expressionEvaluationContextFactory");
 
         final Printer output = printer(
             out,
@@ -90,8 +88,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                 (String message) -> new IllegalStateException(message)
             ),
             environmentContext,
-            evaluator,
-            expressionEvaluationContextFactory
+            evaluator
         );
     }
 
@@ -112,8 +109,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                                             final Runnable closeSession,
                                             final OpenChecker<IllegalStateException> openChecker,
                                             final EnvironmentContext environmentContext,
-                                            final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator,
-                                            final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory) {
+                                            final BiFunction<String, TerminalContext, Object> evaluator) {
         super();
 
         this.terminalId = terminalId;
@@ -129,8 +125,6 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
         this.environmentContext = environmentContext;
 
         this.evaluator = evaluator;
-
-        this.expressionEvaluationContextFactory = expressionEvaluationContextFactory;
     }
 
     // TerminalContext..................................................................................................
@@ -193,18 +187,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
         );
     }
 
-    private final BiFunction<String, TerminalContext, TerminalExpressionEvaluationContext> evaluator;
-
-    @Override
-    public TerminalExpressionEvaluationContext terminalExpressionEvaluationContext() {
-        this.openChecker.check();
-        return this.expressionEvaluationContextFactory.apply(
-            this,
-            this.environmentContext
-        );
-    }
-
-    private final BiFunction<TerminalContext, EnvironmentContext, TerminalExpressionEvaluationContext> expressionEvaluationContextFactory;
+    private final BiFunction<String, TerminalContext, Object> evaluator;
 
     private final OpenChecker<IllegalStateException> openChecker;
 
@@ -232,8 +215,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                 this.closeSession,
                 this.openChecker,
                 Objects.requireNonNull(after, "context"), // EnvironmentContext
-                this.evaluator,
-                this.expressionEvaluationContextFactory
+                this.evaluator
             );
     }
 
