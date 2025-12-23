@@ -45,7 +45,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
             new ByteArrayOutputStream(), // error
             () -> {}, // closeSession
             EnvironmentContexts.empty(
-                LineEnding.CRNL,
+                TerminalContext.TERMINAL_LINE_ENDING,
                 Locale.FRANCE,
                 LocalDateTime::now,
                 EnvironmentContext.ANONYMOUS
