@@ -161,7 +161,7 @@ final class ApacheSshdServerShellCommand implements Command,
             this.environmentContext.cloneEnvironment()
                 .setUser(
                     Optional.of(user)
-                ).setLineEnding(LineEnding.CRNL),
+                ).setLineEnding(TerminalContext.TERMINAL_LINE_ENDING),
             this.evaluator
         );
     }
