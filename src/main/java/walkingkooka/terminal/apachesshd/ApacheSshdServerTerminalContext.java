@@ -25,7 +25,6 @@ import walkingkooka.io.TextReaders;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
-import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.text.HasLineEnding;
 import walkingkooka.text.LineEnding;
 import walkingkooka.text.printer.Printer;
