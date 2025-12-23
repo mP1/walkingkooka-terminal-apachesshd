@@ -29,8 +29,6 @@ import walkingkooka.io.TextReader;
 import walkingkooka.net.IpPort;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
-import walkingkooka.terminal.expression.FakeTerminalExpressionEvaluationContext;
-import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.server.TerminalServerContexts;
 import walkingkooka.text.CharSequences;
@@ -47,7 +45,6 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Starts a Apache MINA SSHD server using a provided {@link TerminalServerContext} to create terminal sessions.
