@@ -22,7 +22,6 @@ import walkingkooka.environment.EnvironmentContexts;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalContextTesting;
 import walkingkooka.terminal.TerminalId;
-import walkingkooka.text.LineEnding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
