@@ -121,7 +121,10 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
         this.closeSession = closeSession;
         this.openChecker = openChecker;
 
-        this.environmentContext = environmentContext;
+        this.environmentContext = environmentContext.setEnvironmentValue(
+            TERMINAL_ID,
+            terminalId
+        );
 
         this.evaluator = evaluator;
     }
@@ -268,6 +271,6 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
 
     @Override
     public String toString() {
-        return "terminalId=" + this.terminalId + " " + this.environmentContext;
+        return this.environmentContext.toString();
     }
 }

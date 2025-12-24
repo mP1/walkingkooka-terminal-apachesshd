@@ -72,7 +72,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
                     EnvironmentValueName.with("extra"),
                     222
                 ),
-            "terminalId=1 {extra=222, lineEnding=\"\\r\\n\", locale=fr_FR}"
+            "{extra=222, lineEnding=\"\\r\\n\", locale=fr_FR, terminal=1}"
         );
     }
 
