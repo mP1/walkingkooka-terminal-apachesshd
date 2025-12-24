@@ -268,6 +268,6 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
 
     @Override
     public String toString() {
-        return this.terminalId.toString();
+        return "terminalId=" + this.terminalId + " " + this.environmentContext;
     }
 }

@@ -17,8 +17,11 @@
 
 package walkingkooka.terminal.apachesshd;
 
+import org.junit.jupiter.api.Test;
+import walkingkooka.ToStringTesting;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.environment.EnvironmentContexts;
+import walkingkooka.environment.EnvironmentValueName;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalContextTesting;
 import walkingkooka.terminal.TerminalId;
@@ -28,7 +31,8 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-public final class ApacheSshdServerTerminalContextTest implements TerminalContextTesting<ApacheSshdServerTerminalContext> {
+public final class ApacheSshdServerTerminalContextTest implements TerminalContextTesting<ApacheSshdServerTerminalContext>,
+    ToStringTesting<ApacheSshdServerTerminalContext> {
 
     @Override
     public ApacheSshdServerTerminalContext createContext() {
@@ -43,16 +47,32 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
             new ByteArrayOutputStream(), // output
             new ByteArrayOutputStream(), // error
             () -> {}, // closeSession
-            EnvironmentContexts.empty(
-                TerminalContext.TERMINAL_LINE_ENDING,
-                Locale.FRANCE,
-                LocalDateTime::now,
-                EnvironmentContext.ANONYMOUS
+            EnvironmentContexts.map(
+                EnvironmentContexts.empty(
+                    TerminalContext.TERMINAL_LINE_ENDING,
+                    Locale.FRANCE,
+                    LocalDateTime::now,
+                    EnvironmentContext.ANONYMOUS
+                )
             ),
             (final String expression,
              final TerminalContext terminalContext) -> {
                 throw new UnsupportedOperationException();
             }
+        );
+    }
+
+    // toString.........................................................................................................
+
+    @Test
+    public void testToString() {
+        this.toStringAndCheck(
+            this.createContext()
+                .setEnvironmentValue(
+                    EnvironmentValueName.with("extra"),
+                    222
+                ),
+            "terminalId=1 {extra=222, lineEnding=\"\\r\\n\", locale=fr_FR}"
         );
     }
 
