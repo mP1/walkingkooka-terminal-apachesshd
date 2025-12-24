@@ -136,7 +136,7 @@ final class ApacheSshdServerShellCommand implements Command,
             this.terminalContext = terminalContext;
 
             final Thread thread = new Thread(
-                () -> terminalContext.evaluate("shell")
+                () -> terminalContext.evaluate("=shell()") // for now leading equals sign is required
             );
             thread.setName(TerminalContext.class.getSimpleName() + "-shell-" + terminalContext.terminalId());
             thread.start();
