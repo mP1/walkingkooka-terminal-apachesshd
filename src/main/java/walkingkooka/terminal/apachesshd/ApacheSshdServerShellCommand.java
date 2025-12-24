@@ -33,7 +33,6 @@ import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.text.CharSequences;
-import walkingkooka.text.LineEnding;
 
 import java.io.IOException;
 import java.io.InputStream;
