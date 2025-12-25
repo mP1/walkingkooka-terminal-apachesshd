@@ -32,7 +32,6 @@ import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.server.TerminalServerContexts;
 import walkingkooka.text.CharSequences;
-import walkingkooka.text.LineEnding;
 import walkingkooka.text.printer.Printer;
 
 import java.io.IOException;
@@ -204,7 +203,7 @@ public final class ApacheSshdServer {
             },
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
-                    LineEnding.NL,
+                    TerminalContext.TERMINAL_LINE_ENDING,
                     Locale.forLanguageTag("en-AU"),
                     LocalDateTime::now,
                     EnvironmentContext.ANONYMOUS
