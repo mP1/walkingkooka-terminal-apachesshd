@@ -119,7 +119,7 @@ final class ApacheSshdServerShellCommand implements Command,
 
         if (null != message) {
             this.out.write(
-                message.concat("\n")
+                message.concat(TerminalContext.TERMINAL_LINE_ENDING.toString())
                     .getBytes(StandardCharsets.UTF_8)
             );
             this.out.flush();
