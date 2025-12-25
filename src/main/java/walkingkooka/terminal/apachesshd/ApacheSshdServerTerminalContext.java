@@ -40,6 +40,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * A {@link TerminalContext} for Apache SSHD.
@@ -71,9 +72,40 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
             terminalId,
             TextReaders.reader(
                 new InputStreamReader(in),
-                (Character c) -> {
-                    output.print(c.toString());
-                    output.flush(); // flush required!
+                new Consumer<>() {
+                    @Override
+                    public void accept(final Character character) {
+                        final char c = character.charValue();
+
+                        final String print;
+
+                        switch (c) {
+                            case '\n':
+                                if (this.skipNextLf) {
+                                    print = null;
+                                    break;
+                                } else {
+                                    print = LineEnding.NL.toString();
+                                }
+                                this.skipNextLf = false;
+                                break;
+                            case '\r':
+                                print = TERMINAL_LINE_ENDING.toString();
+                                this.skipNextLf = true;
+                                break;
+                            default:
+                                print = character.toString();
+                                this.skipNextLf = false;
+                                break;
+                        }
+
+                        if (null != print) {
+                            output.print(print);
+                            output.flush(); // flush required!
+                        }
+                    }
+
+                    private boolean skipNextLf = false;
                 }
             ),
             output,
