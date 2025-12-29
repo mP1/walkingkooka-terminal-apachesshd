@@ -51,7 +51,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
                 EnvironmentContexts.empty(
                     TerminalContext.TERMINAL_LINE_ENDING,
                     Locale.FRANCE,
-                    LocalDateTime::now,
+                    () -> LocalDateTime.MIN,
                     EnvironmentContext.ANONYMOUS
                 )
             ),
