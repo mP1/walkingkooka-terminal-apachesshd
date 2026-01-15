@@ -145,6 +145,11 @@ final class ApacheSshdServerShellCommand implements Command,
 
     private TerminalContext createTerminalContext(final TerminalId terminalId,
                                                   final EmailAddress user) {
+        final EnvironmentContext environmentContext = this.environmentContext.cloneEnvironment();
+        environmentContext.setUser(
+            Optional.of(user)
+        );
+
         return ApacheSshdServerTerminalContext.with(
             terminalId,
             this.in,
@@ -157,10 +162,7 @@ final class ApacheSshdServerShellCommand implements Command,
                     throw new RuntimeException(cause);
                 }
             }, // closeSession
-            this.environmentContext.cloneEnvironment()
-                .setUser(
-                    Optional.of(user)
-                ),
+            environmentContext,
             this.evaluator
         );
     }
