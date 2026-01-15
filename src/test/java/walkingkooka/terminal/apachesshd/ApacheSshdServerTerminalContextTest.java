@@ -66,15 +66,17 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
 
     @Test
     public void testToString() {
+        final ApacheSshdServerTerminalContext context = this.createContext();
+        context.setEnvironmentValue(
+            EnvironmentValueName.with(
+                "extra",
+                Integer.class
+            ),
+            222
+        );
+
         this.toStringAndCheck(
-            this.createContext()
-                .setEnvironmentValue(
-                    EnvironmentValueName.with(
-                        "extra",
-                        Integer.class
-                    ),
-                    222
-                ),
+            context,
             "{extra=222, lineEnding=\"\\r\\n\", locale=fr_FR, terminal=1}"
         );
     }

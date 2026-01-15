@@ -19,10 +19,8 @@ package walkingkooka.terminal.apachesshd;
 
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.environment.EnvironmentContextDelegator;
-import walkingkooka.environment.EnvironmentValueName;
 import walkingkooka.io.TextReader;
 import walkingkooka.io.TextReaders;
-import walkingkooka.net.email.EmailAddress;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.text.HasLineEnding;
@@ -37,7 +35,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -152,7 +149,8 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
         this.closeSession = closeSession;
         this.openChecker = openChecker;
 
-        this.environmentContext = environmentContext.setEnvironmentValue(
+        this.environmentContext = environmentContext;
+        environmentContext.setEnvironmentValue(
             TERMINAL_ID,
             terminalId
         );
@@ -250,38 +248,6 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                 Objects.requireNonNull(after, "context"), // EnvironmentContext
                 this.evaluator
             );
-    }
-
-    @Override
-    public <T> TerminalContext setEnvironmentValue(final EnvironmentValueName<T> name,
-                                                   final T value) {
-        this.environmentContext()
-            .setEnvironmentValue(
-                name,
-                value
-            );
-        return this;
-    }
-
-    @Override
-    public TerminalContext removeEnvironmentValue(final EnvironmentValueName<?> name) {
-        this.environmentContext()
-            .removeEnvironmentValue(name);
-        return this;
-    }
-
-    @Override
-    public TerminalContext setLineEnding(final LineEnding lineEnding) {
-        this.environmentContext()
-            .setLineEnding(lineEnding);
-        return this;
-    }
-
-    @Override
-    public TerminalContext setUser(final Optional<EmailAddress> user) {
-        this.environmentContext()
-            .setUser(user);
-        return this;
     }
 
     @Override
