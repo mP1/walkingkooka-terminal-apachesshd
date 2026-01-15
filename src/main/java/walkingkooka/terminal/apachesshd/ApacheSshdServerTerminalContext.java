@@ -36,7 +36,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -275,13 +274,6 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
     public TerminalContext setLineEnding(final LineEnding lineEnding) {
         this.environmentContext()
             .setLineEnding(lineEnding);
-        return this;
-    }
-
-    @Override
-    public TerminalContext setLocale(final Locale locale) {
-        this.environmentContext()
-            .setLocale(locale);
         return this;
     }
 
