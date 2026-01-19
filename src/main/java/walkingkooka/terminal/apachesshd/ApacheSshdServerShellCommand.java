@@ -27,7 +27,9 @@ import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.session.ServerSessionAware;
 import org.apache.sshd.server.session.ServerSessionHolder;
 import walkingkooka.environment.EnvironmentContext;
+import walkingkooka.environment.EnvironmentContexts;
 import walkingkooka.net.email.EmailAddress;
+import walkingkooka.predicate.Predicates;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
@@ -162,7 +164,10 @@ final class ApacheSshdServerShellCommand implements Command,
                     throw new RuntimeException(cause);
                 }
             }, // closeSession
-            environmentContext,
+            EnvironmentContexts.readOnly(
+                Predicates.is(EnvironmentContext.USER), // prevent changes to "user"
+                environmentContext
+            ),
             this.evaluator
         );
     }
