@@ -89,6 +89,10 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                                 print = TERMINAL_LINE_ENDING.toString();
                                 this.skipNextLf = true;
                                 break;
+                            case 127:
+                                // print backspace to "move" cursor back over the previous character
+                                print = "\u0008";
+                                break;
                             default:
                                 print = character.toString();
                                 this.skipNextLf = false;
