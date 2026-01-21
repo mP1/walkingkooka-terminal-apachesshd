@@ -138,7 +138,13 @@ final class ApacheSshdServerShellCommand implements Command,
             this.terminalContext = terminalContext;
 
             final Thread thread = new Thread(
-                () -> terminalContext.evaluate("=shell()") // for now leading equals sign is required
+                () -> {
+                    try {
+                        terminalContext.evaluate("=shell()"); // for now leading equals sign is required
+                    } finally {
+                        ApacheSshdServerShellCommand.this.exitTerminal();
+                    }
+                }
             );
             thread.setName(TerminalContext.class.getSimpleName() + "-shell-" + terminalContext.terminalId());
             thread.start();
@@ -157,19 +163,23 @@ final class ApacheSshdServerShellCommand implements Command,
             this.in,
             this.out,
             this.err,
-            () -> {
-                try {
-                    this.channelSession.close();
-                } catch (final IOException cause) {
-                    throw new RuntimeException(cause);
-                }
-            }, // closeSession
+            this::exitTerminal,
             EnvironmentContexts.readOnly(
                 Predicates.is(EnvironmentContext.USER), // prevent changes to "user"
                 environmentContext
             ),
             this.evaluator
         );
+    }
+
+    private void exitTerminal() {
+        try {
+            this.channelSession.close(); // closing channel doesnt actually disconnect remote user
+            this.channelSession.getSession()
+                .close();
+        } catch (final IOException cause) {
+            throw new RuntimeException(cause);
+        }
     }
 
     private final TerminalServerContext terminalServerContext;
