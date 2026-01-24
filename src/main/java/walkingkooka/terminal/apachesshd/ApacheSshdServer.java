@@ -32,6 +32,7 @@ import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.server.TerminalServerContexts;
 import walkingkooka.text.CharSequences;
+import walkingkooka.text.Indentation;
 import walkingkooka.text.printer.Printer;
 
 import java.io.IOException;
@@ -203,6 +204,7 @@ public final class ApacheSshdServer {
             },
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
+                    Indentation.SPACES2,
                     TerminalContext.TERMINAL_LINE_ENDING,
                     Locale.forLanguageTag("en-AU"),
                     LocalDateTime::now,
