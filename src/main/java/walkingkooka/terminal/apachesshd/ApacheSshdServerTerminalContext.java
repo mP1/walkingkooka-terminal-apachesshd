@@ -116,7 +116,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
             closeSession,
             OpenChecker.with(
                 "Terminal closed",
-                (String message) -> new IllegalStateException(message)
+                IllegalStateException::new
             ),
             environmentContext,
             evaluator
