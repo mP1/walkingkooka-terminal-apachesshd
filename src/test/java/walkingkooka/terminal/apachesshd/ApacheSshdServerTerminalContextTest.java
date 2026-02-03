@@ -79,7 +79,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
 
         this.toStringAndCheck(
             context,
-            "{extra=222, indentation=\"  \", lineEnding=\"\\r\\n\", locale=fr_FR, terminal=1}"
+            "{extra=222, indentation=\"  \", lineEnding=\"\\r\\n\", locale=fr_FR, terminal=1, timeOffset=Z}"
         );
     }
 
