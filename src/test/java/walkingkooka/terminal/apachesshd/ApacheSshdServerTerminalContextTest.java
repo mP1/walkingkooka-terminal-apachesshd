@@ -47,7 +47,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
             }, // input
             new ByteArrayOutputStream(), // output
             new ByteArrayOutputStream(), // error
-            () -> {}, // closeSession
+            (exitValue) -> {}, // exitValue
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
                     Indentation.SPACES2,

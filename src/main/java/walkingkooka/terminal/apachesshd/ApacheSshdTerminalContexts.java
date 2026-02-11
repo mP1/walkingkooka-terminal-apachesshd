@@ -25,6 +25,7 @@ import walkingkooka.terminal.TerminalId;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
 
@@ -35,7 +36,7 @@ public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
                                              final InputStream in,
                                              final OutputStream out,
                                              final OutputStream err,
-                                             final Runnable closeSession,
+                                             final Consumer<Object> exitValue,
                                              final EnvironmentContext environmentContext,
                                              final BiFunction<String, TerminalContext, Object> evaluator) {
         return ApacheSshdServerTerminalContext.with(
@@ -43,7 +44,7 @@ public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
             in,
             out,
             err,
-            closeSession,
+            exitValue,
             environmentContext,
             evaluator
         );
