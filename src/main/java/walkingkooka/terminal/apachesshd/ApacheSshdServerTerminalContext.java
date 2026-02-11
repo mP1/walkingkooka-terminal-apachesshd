@@ -48,14 +48,14 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                                                 final InputStream in,
                                                 final OutputStream out,
                                                 final OutputStream err,
-                                                final Runnable closeSession,
+                                                final Consumer<Object> exitValue,
                                                 final EnvironmentContext environmentContext,
                                                 final BiFunction<String, TerminalContext, Object> evaluator) {
         Objects.requireNonNull(terminalId, "terminalId");
         Objects.requireNonNull(in, "in");
         Objects.requireNonNull(out, "out");
         Objects.requireNonNull(err, "err");
-        Objects.requireNonNull(closeSession, "closeSession");
+        Objects.requireNonNull(exitValue, "exitValue");
         Objects.requireNonNull(environmentContext, "environmentContext");
         Objects.requireNonNull(evaluator, "evaluator");
 
@@ -113,7 +113,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                 err,
                 environmentContext
             ),
-            closeSession,
+            exitValue,
             OpenChecker.with(
                 "Terminal closed",
                 IllegalStateException::new
@@ -137,7 +137,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                                             final TextReader input,
                                             final Printer output,
                                             final Printer error,
-                                            final Runnable closeSession,
+                                            final Consumer<Object> exitValue,
                                             final OpenChecker<IllegalStateException> openChecker,
                                             final EnvironmentContext environmentContext,
                                             final BiFunction<String, TerminalContext, Object> evaluator) {
@@ -150,7 +150,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
 
         this.error = error;
 
-        this.closeSession = closeSession;
+        this.exitValue = exitValue;
         this.openChecker = openChecker;
 
         this.environmentContext = environmentContext;
@@ -177,13 +177,13 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
     }
 
     @Override
-    public void exitTerminal() {
+    public void exitTerminal(final Object exitValue) {
         this.openChecker.check();
-        this.closeSession.run();
+        this.exitValue.accept(exitValue);
         this.openChecker.close();
     }
 
-    private final Runnable closeSession;
+    private final Consumer<Object> exitValue;
 
     @Override
     public TextReader input() {
@@ -246,7 +246,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                 this.input,
                 this.output,
                 this.error,
-                this.closeSession,
+                this.exitValue,
                 this.openChecker,
                 Objects.requireNonNull(after, "context"), // EnvironmentContext
                 this.evaluator

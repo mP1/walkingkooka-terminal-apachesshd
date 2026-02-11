@@ -142,7 +142,7 @@ final class ApacheSshdServerShellCommand implements Command,
                     try {
                         terminalContext.evaluate("=shell()"); // for now leading equals sign is required
                     } finally {
-                        ApacheSshdServerShellCommand.this.exitTerminal();
+                        ApacheSshdServerShellCommand.this.exitTerminal(null);
                     }
                 }
             );
@@ -172,7 +172,8 @@ final class ApacheSshdServerShellCommand implements Command,
         );
     }
 
-    private void exitTerminal() {
+    // TODO ignore exitValue for now
+    private void exitTerminal(final Object exitValue) {
         try {
             this.channelSession.close(); // closing channel doesnt actually disconnect remote user
             this.channelSession.getSession()
@@ -193,7 +194,7 @@ final class ApacheSshdServerShellCommand implements Command,
         final TerminalContext terminalContext = this.terminalContext;
         if (null != terminalContext) {
             this.terminalContext = null;
-            terminalContext.exitTerminal();
+            terminalContext.exitTerminal(null);
         }
     }
 

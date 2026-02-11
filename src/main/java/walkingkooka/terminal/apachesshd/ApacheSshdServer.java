@@ -183,7 +183,7 @@ public final class ApacheSshdServer {
                         switch (e) {
                             case "":
                                 printer.println("Exiting...");
-                                terminalContext.exitTerminal();
+                                terminalContext.exitTerminal(null);
                                 printer.println("isTerminalOpen: " + terminalContext.isTerminalOpen());
                                 break;
                             default:
