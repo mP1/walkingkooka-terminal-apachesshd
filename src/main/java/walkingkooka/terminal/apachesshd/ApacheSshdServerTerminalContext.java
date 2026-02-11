@@ -177,11 +177,10 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
     }
 
     @Override
-    public TerminalContext exitTerminal() {
+    public void exitTerminal() {
         this.openChecker.check();
         this.closeSession.run();
         this.openChecker.close();
-        return this;
     }
 
     private final Runnable closeSession;
