@@ -40,6 +40,7 @@ import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Scanner;
@@ -204,6 +205,7 @@ public final class ApacheSshdServer {
             },
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
+                    Currency.getInstance("AUD"),
                     Indentation.SPACES2,
                     TerminalContext.TERMINAL_LINE_ENDING,
                     Locale.forLanguageTag("en-AU"),
