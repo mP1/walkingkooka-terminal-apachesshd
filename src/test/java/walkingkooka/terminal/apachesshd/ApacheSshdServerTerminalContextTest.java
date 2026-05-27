@@ -29,6 +29,7 @@ import walkingkooka.text.Indentation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.Locale;
@@ -51,6 +52,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
             (exitValue) -> {}, // exitValue
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
+                    StandardCharsets.UTF_8,
                     Currency.getInstance("AUD"),
                     Indentation.SPACES2,
                     TerminalContext.TERMINAL_LINE_ENDING,
@@ -81,7 +83,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
 
         this.toStringAndCheck(
             context,
-            "{currency=\"AUD\", extra=222, indentation=\"  \", lineEnding=\"\\r\\n\", locale=fr_FR, terminal=1, timeOffset=Z}"
+            "{charset=\"UTF-8\", currency=\"AUD\", extra=222, indentation=\"  \", lineEnding=\"\\r\\n\", locale=fr_FR, terminal=1, timeOffset=Z}"
         );
     }
 
