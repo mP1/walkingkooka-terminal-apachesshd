@@ -36,6 +36,7 @@ import walkingkooka.text.Indentation;
 import walkingkooka.text.printer.Printer;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.time.Duration;
@@ -205,6 +206,7 @@ public final class ApacheSshdServer {
             },
             EnvironmentContexts.map(
                 EnvironmentContexts.empty(
+                    StandardCharsets.UTF_8,
                     Currency.getInstance("AUD"),
                     Indentation.SPACES2,
                     TerminalContext.TERMINAL_LINE_ENDING,
