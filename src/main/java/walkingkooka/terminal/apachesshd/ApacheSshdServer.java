@@ -205,15 +205,13 @@ public final class ApacheSshdServer {
                 return 0;
             },
             EnvironmentContexts.map(
-                EnvironmentContexts.empty(
-                    StandardCharsets.UTF_8,
-                    Currency.getInstance("AUD"),
-                    Indentation.SPACES2,
-                    TerminalContext.TERMINAL_LINE_ENDING,
-                    Locale.forLanguageTag("en-AU"),
-                    LocalDateTime::now,
-                    EnvironmentContext.ANONYMOUS
-                )
+                StandardCharsets.UTF_8,
+                Currency.getInstance("AUD"),
+                Indentation.SPACES2,
+                TerminalContext.TERMINAL_LINE_ENDING,
+                Locale.forLanguageTag("en-AU"),
+                LocalDateTime::now,
+                EnvironmentContext.ANONYMOUS
             ), // template EnvironmentContext
             TerminalServerContexts.basic(
                 () -> TerminalId.with(
