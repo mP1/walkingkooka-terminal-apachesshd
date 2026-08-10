@@ -166,7 +166,7 @@ final class ApacheSshdServerShellCommand implements Command,
             this::exitTerminal,
             StorageEnvironmentContexts.readOnly(
                 Predicates.is(EnvironmentContext.USER), // prevent changes to "user"
-                environmentContext
+                StorageEnvironmentContexts.basic(environmentContext)
             ),
             this.evaluator
         );
