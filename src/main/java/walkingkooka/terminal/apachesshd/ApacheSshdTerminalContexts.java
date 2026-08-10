@@ -17,8 +17,8 @@
 
 package walkingkooka.terminal.apachesshd;
 
-import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.reflect.PublicStaticHelper;
+import walkingkooka.storage.StorageEnvironmentContext;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 
@@ -37,7 +37,7 @@ public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
                                              final OutputStream out,
                                              final OutputStream err,
                                              final Consumer<Object> exitValue,
-                                             final EnvironmentContext environmentContext,
+                                             final StorageEnvironmentContext storageEnvironmentContext,
                                              final BiFunction<String, TerminalContext, Object> evaluator) {
         return ApacheSshdServerTerminalContext.with(
             terminalId,
@@ -45,7 +45,7 @@ public final class ApacheSshdTerminalContexts implements PublicStaticHelper {
             out,
             err,
             exitValue,
-            environmentContext,
+            storageEnvironmentContext,
             evaluator
         );
     }
