@@ -29,7 +29,10 @@ import org.apache.sshd.server.session.ServerSessionHolder;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.predicate.Predicates;
+import walkingkooka.storage.StorageEnvironmentContext;
 import walkingkooka.storage.StorageEnvironmentContexts;
+import walkingkooka.storage.StorageName;
+import walkingkooka.storage.StoragePath;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.terminal.expression.TerminalExpressionEvaluationContext;
@@ -153,9 +156,18 @@ final class ApacheSshdServerShellCommand implements Command,
 
     private TerminalContext createTerminalContext(final TerminalId terminalId,
                                                   final EmailAddress user) {
-        final EnvironmentContext environmentContext = this.environmentContext.cloneEnvironment();
-        environmentContext.setUser(
+        final StorageEnvironmentContext storageEnvironmentContext = StorageEnvironmentContexts.basic(
+            this.environmentContext.cloneEnvironment()
+        );
+        storageEnvironmentContext.setUser(
             Optional.of(user)
+        );
+        storageEnvironmentContext.setHomeDirectory(
+            Optional.of(
+                StoragePath.USERS_DIRECTORY_PREFIX.append(
+                    StorageName.with(user.value())
+                )
+            )
         );
 
         return ApacheSshdServerTerminalContext.with(
@@ -166,7 +178,7 @@ final class ApacheSshdServerShellCommand implements Command,
             this::exitTerminal,
             StorageEnvironmentContexts.readOnly(
                 Predicates.is(EnvironmentContext.USER), // prevent changes to "user"
-                StorageEnvironmentContexts.basic(environmentContext)
+                storageEnvironmentContext
             ),
             this.evaluator
         );
