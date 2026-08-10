@@ -18,9 +18,10 @@
 package walkingkooka.terminal.apachesshd;
 
 import walkingkooka.environment.EnvironmentContext;
-import walkingkooka.environment.EnvironmentContextDelegator;
 import walkingkooka.io.TextReader;
 import walkingkooka.io.TextReaders;
+import walkingkooka.storage.StorageEnvironmentContext;
+import walkingkooka.storage.StorageEnvironmentContextDelegator;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
 import walkingkooka.text.HasLineEnding;
@@ -42,26 +43,26 @@ import java.util.function.Consumer;
  * A {@link TerminalContext} for Apache SSHD.
  */
 final class ApacheSshdServerTerminalContext implements TerminalContext,
-    EnvironmentContextDelegator {
+    StorageEnvironmentContextDelegator {
 
     static ApacheSshdServerTerminalContext with(final TerminalId terminalId,
                                                 final InputStream in,
                                                 final OutputStream out,
                                                 final OutputStream err,
                                                 final Consumer<Object> exitValue,
-                                                final EnvironmentContext environmentContext,
+                                                final StorageEnvironmentContext storageEnvironmentContext,
                                                 final BiFunction<String, TerminalContext, Object> evaluator) {
         Objects.requireNonNull(terminalId, "terminalId");
         Objects.requireNonNull(in, "in");
         Objects.requireNonNull(out, "out");
         Objects.requireNonNull(err, "err");
         Objects.requireNonNull(exitValue, "exitValue");
-        Objects.requireNonNull(environmentContext, "environmentContext");
+        Objects.requireNonNull(storageEnvironmentContext, "storageEnvironmentContext");
         Objects.requireNonNull(evaluator, "evaluator");
 
         final Printer output = printer(
             out,
-            environmentContext
+            storageEnvironmentContext
         );
 
         return new ApacheSshdServerTerminalContext(
@@ -111,14 +112,14 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
             output,
             printer(
                 err,
-                environmentContext
+                storageEnvironmentContext
             ),
             exitValue,
             OpenChecker.with(
                 "Terminal closed",
                 IllegalStateException::new
             ),
-            environmentContext,
+            storageEnvironmentContext,
             evaluator
         );
     }
@@ -139,7 +140,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                                             final Printer error,
                                             final Consumer<Object> exitValue,
                                             final OpenChecker<IllegalStateException> openChecker,
-                                            final EnvironmentContext environmentContext,
+                                            final StorageEnvironmentContext storageEnvironmentContext,
                                             final BiFunction<String, TerminalContext, Object> evaluator) {
         super();
 
@@ -153,8 +154,8 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
         this.exitValue = exitValue;
         this.openChecker = openChecker;
 
-        this.environmentContext = environmentContext;
-        environmentContext.setEnvironmentValue(
+        this.storageEnvironmentContext = storageEnvironmentContext;
+        storageEnvironmentContext.setEnvironmentValue(
             TERMINAL_ID,
             terminalId
         );
@@ -230,14 +231,14 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
     @Override
     public TerminalContext cloneEnvironment() {
         return this.setEnvironmentContext(
-            this.environmentContext.cloneEnvironment()
+            this.storageEnvironmentContext.cloneEnvironment()
         );
     }
 
     @Override
     public TerminalContext setEnvironmentContext(final EnvironmentContext context) {
-        final EnvironmentContext before = this.environmentContext;
-        final EnvironmentContext after = before.setEnvironmentContext(context);
+        final StorageEnvironmentContext before = this.storageEnvironmentContext;
+        final StorageEnvironmentContext after = before.setEnvironmentContext(context);
 
         return before == after ?
             this :
@@ -253,17 +254,19 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
             );
     }
 
+    // StorageEnvironmentContextDelegator...............................................................................
+
     @Override
-    public EnvironmentContext environmentContext() {
-        return this.environmentContext;
+    public StorageEnvironmentContext storageEnvironmentContext() {
+        return this.storageEnvironmentContext;
     }
 
-    private final EnvironmentContext environmentContext;
+    private final StorageEnvironmentContext storageEnvironmentContext;
 
     // Object...........................................................................................................
 
     @Override
     public String toString() {
-        return this.environmentContext.toString();
+        return this.storageEnvironmentContext.toString();
     }
 }
