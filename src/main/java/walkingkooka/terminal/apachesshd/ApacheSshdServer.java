@@ -33,6 +33,7 @@ import walkingkooka.terminal.server.TerminalServerContext;
 import walkingkooka.terminal.server.TerminalServerContexts;
 import walkingkooka.text.CharSequences;
 import walkingkooka.text.Indentation;
+import walkingkooka.text.LineEnding;
 import walkingkooka.text.printer.Printer;
 
 import java.io.IOException;
@@ -208,7 +209,7 @@ public final class ApacheSshdServer {
                 StandardCharsets.UTF_8,
                 Currency.getInstance("AUD"),
                 Indentation.SPACES2,
-                TerminalContext.TERMINAL_LINE_ENDING,
+                LineEnding.TERMINAL,
                 Locale.forLanguageTag("en-AU"),
                 LocalDateTime::now,
                 EnvironmentContext.ANONYMOUS
