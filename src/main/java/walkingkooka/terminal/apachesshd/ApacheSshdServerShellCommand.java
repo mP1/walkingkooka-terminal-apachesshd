@@ -122,11 +122,11 @@ final class ApacheSshdServerShellCommand implements Command,
         }
 
         if (null != message) {
-            this.out.write(
+            this.err.write(
                 message.concat(this.environmentContext.lineEnding().toString())
                     .getBytes(this.environmentContext.charset())
             );
-            this.out.flush();
+            this.err.flush();
             channelSession.close();
         } else {
             final EmailAddress finalUserEmail = userEmail;
