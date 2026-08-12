@@ -42,7 +42,6 @@ import walkingkooka.text.CharSequences;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -125,7 +124,7 @@ final class ApacheSshdServerShellCommand implements Command,
         if (null != message) {
             this.out.write(
                 message.concat(this.environmentContext.lineEnding().toString())
-                    .getBytes(StandardCharsets.UTF_8)
+                    .getBytes(this.environmentContext.charset())
             );
             this.out.flush();
             channelSession.close();
