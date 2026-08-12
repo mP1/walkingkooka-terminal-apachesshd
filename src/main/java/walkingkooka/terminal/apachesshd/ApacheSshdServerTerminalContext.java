@@ -74,7 +74,7 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                     public void accept(final Character character) {
                         final char c = character.charValue();
 
-                        final String print;
+                        final CharSequence print;
 
                         switch (c) {
                             case '\n':
@@ -82,12 +82,12 @@ final class ApacheSshdServerTerminalContext implements TerminalContext,
                                     print = null;
                                     break;
                                 } else {
-                                    print = LineEnding.NL.toString();
+                                    print = LineEnding.NL;
                                 }
                                 this.skipNextLf = false;
                                 break;
                             case '\r':
-                                print = TERMINAL_LINE_ENDING.toString();
+                                print = LineEnding.TERMINAL;
                                 this.skipNextLf = true;
                                 break;
                             case 127:
