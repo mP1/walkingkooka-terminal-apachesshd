@@ -21,13 +21,13 @@ import org.junit.jupiter.api.Test;
 import walkingkooka.ToStringTesting;
 import walkingkooka.environment.EnvironmentValueName;
 import walkingkooka.terminal.TerminalContext;
-import walkingkooka.terminal.TerminalContextTesting;
+import walkingkooka.terminal.TerminalContextTesting2;
 import walkingkooka.terminal.TerminalId;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-public final class ApacheSshdServerTerminalContextTest implements TerminalContextTesting<ApacheSshdServerTerminalContext>,
+public final class ApacheSshdServerTerminalContextTest implements TerminalContextTesting2<ApacheSshdServerTerminalContext>,
     ToStringTesting<ApacheSshdServerTerminalContext> {
 
     @Override
