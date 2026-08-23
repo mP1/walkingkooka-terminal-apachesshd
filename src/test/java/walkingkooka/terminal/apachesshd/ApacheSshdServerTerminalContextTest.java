@@ -20,6 +20,7 @@ package walkingkooka.terminal.apachesshd;
 import org.junit.jupiter.api.Test;
 import walkingkooka.ToStringTesting;
 import walkingkooka.environment.EnvironmentValueName;
+import walkingkooka.storage.StorageEnvironmentContext;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalContextTesting2;
 import walkingkooka.terminal.TerminalId;
@@ -32,6 +33,12 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
 
     @Override
     public ApacheSshdServerTerminalContext createContext() {
+        return this.createContext(
+            STORAGE_ENVIRONMENT_CONTEXT.cloneEnvironment()
+        );
+    }
+
+    private ApacheSshdServerTerminalContext createContext(final StorageEnvironmentContext context) {
         return ApacheSshdServerTerminalContext.with(
             TerminalId.with(1),
             new InputStream() {
@@ -43,11 +50,24 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
             new ByteArrayOutputStream(), // output
             new ByteArrayOutputStream(), // error
             (exitValue) -> {}, // exitValue
-            STORAGE_ENVIRONMENT_CONTEXT.cloneEnvironment(),
+            context,
             (final String expression,
              final TerminalContext terminalContext) -> {
                 throw new UnsupportedOperationException();
             }
+        );
+    }
+
+    // HasEnvironmentContext............................................................................................
+
+    @Test
+    @Override
+    public void testEnvironmentContext() {
+        final StorageEnvironmentContext context = STORAGE_ENVIRONMENT_CONTEXT.cloneEnvironment();
+
+        this.environmentContextAndCheck(
+            this.createContext(context),
+            context
         );
     }
 
