@@ -42,6 +42,7 @@ import walkingkooka.text.CharSequences;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -146,6 +147,14 @@ final class ApacheSshdServerShellCommand implements Command,
                     } finally {
                         ApacheSshdServerShellCommand.this.exitTerminal(null);
                     }
+                }
+            );
+            thread.setUncaughtExceptionHandler(
+                (final Thread t, final Throwable cause) -> {
+                    final PrintWriter printWriter = new PrintWriter(this.err);
+                    cause.printStackTrace(printWriter);
+                    printWriter.flush();
+                    printWriter.close();
                 }
             );
             thread.setName(TerminalContext.class.getSimpleName() + "-shell-" + terminalContext.terminalId());
