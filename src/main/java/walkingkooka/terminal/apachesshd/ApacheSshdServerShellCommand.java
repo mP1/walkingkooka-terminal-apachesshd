@@ -142,7 +142,7 @@ final class ApacheSshdServerShellCommand implements Command,
             final Thread thread = new Thread(
                 () -> {
                     try {
-                        terminalContext.evaluate("=shell()"); // for now leading equals sign is required
+                        terminalContext.evaluate("shell()"); // for now leading equals sign is required
                     } finally {
                         ApacheSshdServerShellCommand.this.exitTerminal(null);
                     }
