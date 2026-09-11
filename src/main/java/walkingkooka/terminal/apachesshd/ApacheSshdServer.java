@@ -26,6 +26,8 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.environment.EnvironmentContexts;
 import walkingkooka.io.TextReader;
+import walkingkooka.logging.CanLogs;
+import walkingkooka.logging.LoggingLevel;
 import walkingkooka.net.IpPort;
 import walkingkooka.terminal.TerminalContext;
 import walkingkooka.terminal.TerminalId;
@@ -206,11 +208,13 @@ public final class ApacheSshdServer {
                 return 0;
             },
             EnvironmentContexts.map(
+                CanLogs.nullCanLog(),
                 StandardCharsets.UTF_8,
                 Currency.getInstance("AUD"),
                 Indentation.SPACES2,
                 LineEnding.TERMINAL,
                 Locale.forLanguageTag("en-AU"),
+                LoggingLevel.NONE,
                 LocalDateTime::now,
                 EnvironmentContext.ANONYMOUS
             ), // template EnvironmentContext

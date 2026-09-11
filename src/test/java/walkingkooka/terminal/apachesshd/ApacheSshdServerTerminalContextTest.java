@@ -86,7 +86,7 @@ public final class ApacheSshdServerTerminalContextTest implements TerminalContex
 
         this.toStringAndCheck(
             context,
-            "{charset=UTF-8, currency=AUD, currentWorkingDirectory=/current1/working2/directory3, extra=222, homeDirectory=/users/user123@example.com, indentation=\"  \", lineEnding=\"\\n\", locale=en_AU, terminalId=1, timeOffset=Z, user=user123@example.com}"
+            "{charset=UTF-8, currency=AUD, currentWorkingDirectory=/current1/working2/directory3, extra=222, homeDirectory=/users/user123@example.com, indentation=\"  \", lineEnding=\"\\n\", locale=en_AU, loggingLevel=NONE, terminalId=1, timeOffset=Z, user=user123@example.com}"
         );
     }
 
