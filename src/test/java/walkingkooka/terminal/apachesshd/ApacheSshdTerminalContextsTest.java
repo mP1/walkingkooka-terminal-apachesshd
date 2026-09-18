@@ -17,7 +17,6 @@
 
 package walkingkooka.terminal.apachesshd;
 
-import walkingkooka.reflect.JavaVisibility;
 import walkingkooka.reflect.PublicStaticHelperTesting;
 
 import java.lang.reflect.Method;
@@ -27,11 +26,6 @@ public final class ApacheSshdTerminalContextsTest implements PublicStaticHelperT
     @Override
     public Class<ApacheSshdTerminalContexts> type() {
         return ApacheSshdTerminalContexts.class;
-    }
-
-    @Override
-    public JavaVisibility typeVisibility() {
-        return JavaVisibility.PUBLIC;
     }
 
     @Override
