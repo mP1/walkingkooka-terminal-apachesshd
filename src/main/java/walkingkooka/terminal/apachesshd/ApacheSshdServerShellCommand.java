@@ -27,6 +27,8 @@ import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.session.ServerSessionAware;
 import org.apache.sshd.server.session.ServerSessionHolder;
 import walkingkooka.environment.EnvironmentContext;
+import walkingkooka.locale.CanLocaleForLanguageTag;
+import walkingkooka.locale.LocaleLanguageTag;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.predicate.Predicates;
 import walkingkooka.storage.StorageEnvironmentContext;
@@ -43,6 +45,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -55,20 +60,25 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerSessionHolder,
     SessionHolder<ServerSession> {
 
-    static ApacheSshdServerShellCommand with(final BiFunction<String, TerminalContext, Object> evaluator,
+    static ApacheSshdServerShellCommand with(final CanLocaleForLanguageTag canLocaleForLanguageTag,
+                                             final BiFunction<String, TerminalContext, Object> evaluator,
                                              final TerminalServerContext terminalServerContext,
                                              final EnvironmentContext environmentContext) {
         return new ApacheSshdServerShellCommand(
+            canLocaleForLanguageTag,
             evaluator,
             terminalServerContext,
             environmentContext
         );
     }
 
-    private ApacheSshdServerShellCommand(final BiFunction<String, TerminalContext, Object> evaluator,
+    private ApacheSshdServerShellCommand(final CanLocaleForLanguageTag canLocaleForLanguageTag,
+                                         final BiFunction<String, TerminalContext, Object> evaluator,
                                          final TerminalServerContext terminalServerContext,
                                          final EnvironmentContext environmentContext) {
         super();
+
+        this.canLocaleForLanguageTag = canLocaleForLanguageTag;
         this.evaluator = evaluator;
         this.terminalServerContext = terminalServerContext;
         this.environmentContext = environmentContext;
@@ -110,8 +120,9 @@ final class ApacheSshdServerShellCommand implements Command,
         EmailAddress userEmail = null;
         String message = null;
 
-        String loginUser = environment.getEnv()
-            .get(Environment.ENV_USER);
+        final Map<String, String> env = environment.getEnv();
+
+        String loginUser = env.get(Environment.ENV_USER);
         if (null != loginUser) {
             try {
                 userEmail = EmailAddress.parse(loginUser);
@@ -120,6 +131,49 @@ final class ApacheSshdServerShellCommand implements Command,
             }
         } else {
             message = "Missing " + CharSequences.quoteAndEscape(Environment.ENV_USER) + " from environment";
+        }
+
+        final String lang = env.get("LANG");
+        Charset charset = null;
+        Locale locale = null;
+
+        if(null == message) {
+            if (null != lang) {
+                // LANG=en_US.UTF-8 sublime_text
+                final int dot = lang.indexOf('.');
+                final String localeString = -1 == dot ?
+                    lang :
+                    lang.substring(
+                        0,
+                        dot
+                    );
+
+                try {
+                    locale = this.canLocaleForLanguageTag.localeForLanguageTagOrFail(
+                        LocaleLanguageTag.parse(
+                            localeString.replace('_', '-')
+                        )
+                    );
+                } catch (final UnsupportedOperationException rethrow) {
+                    throw rethrow;
+                } catch (final RuntimeException cause) {
+                    message = cause.getMessage();
+                }
+
+                if(-1 != dot) {
+                    try {
+                        charset = Charset.forName(
+                            lang.substring(
+                                dot + 1
+                            )
+                        );
+                    } catch (final UnsupportedOperationException rethrow) {
+                        throw rethrow;
+                    } catch (final RuntimeException cause) {
+                        message = cause.getMessage();
+                    }
+                }
+            }
         }
 
         final EnvironmentContext environmentContext = this.environmentContext;
@@ -133,13 +187,18 @@ final class ApacheSshdServerShellCommand implements Command,
             channelSession.close();
         } else {
             final EmailAddress finalUserEmail = userEmail;
+            final Optional<Charset> finalCharset = Optional.ofNullable(charset);
+            final Optional<Locale> finalLocale = Optional.ofNullable(locale);
 
             final TerminalContext terminalContext = this.terminalServerContext.addTerminalContext(
                 (terminalId) -> this.createTerminalContext(
                     terminalId,
-                    finalUserEmail
+                    finalUserEmail,
+                    finalCharset,
+                    finalLocale
                 )
             );
+
             this.terminalContext = terminalContext;
 
             final Thread thread = new Thread(
@@ -164,8 +223,12 @@ final class ApacheSshdServerShellCommand implements Command,
         }
     }
 
+    private final CanLocaleForLanguageTag canLocaleForLanguageTag;
+
     private TerminalContext createTerminalContext(final TerminalId terminalId,
-                                                  final EmailAddress user) {
+                                                  final EmailAddress user,
+                                                  final Optional<Charset> charset,
+                                                  final Optional<Locale> locale) {
         final StorageEnvironmentContext storageEnvironmentContext = StorageEnvironmentContexts.basic(
             this.environmentContext.cloneEnvironment()
         );
@@ -179,6 +242,19 @@ final class ApacheSshdServerShellCommand implements Command,
                 )
             )
         );
+
+        // replace charset and locale if given
+        if (charset.isPresent()) {
+            storageEnvironmentContext.setCharset(
+                charset.get()
+            );
+        }
+
+        if (locale.isPresent()) {
+            storageEnvironmentContext.setLocale(
+                locale.get()
+            );
+        }
 
         return ApacheSshdServerTerminalContext.with(
             terminalId,
