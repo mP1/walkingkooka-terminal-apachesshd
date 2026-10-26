@@ -122,10 +122,12 @@ final class ApacheSshdServerShellCommand implements Command,
             message = "Missing " + CharSequences.quoteAndEscape(Environment.ENV_USER) + " from environment";
         }
 
+        final EnvironmentContext environmentContext = this.environmentContext;
+
         if (null != message) {
             this.err.write(
-                message.concat(this.environmentContext.lineEnding().toString())
-                    .getBytes(this.environmentContext.charset())
+                message.concat(environmentContext.lineEnding().toString())
+                    .getBytes(environmentContext.charset())
             );
             this.err.flush();
             channelSession.close();
