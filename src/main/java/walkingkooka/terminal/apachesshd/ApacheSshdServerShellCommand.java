@@ -26,6 +26,8 @@ import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.session.ServerSessionAware;
 import org.apache.sshd.server.session.ServerSessionHolder;
+import walkingkooka.ToStringBuilder;
+import walkingkooka.UsesToStringBuilder;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.locale.CanLocaleForLanguageTag;
 import walkingkooka.locale.LocaleLanguageTag;
@@ -58,7 +60,8 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerChannelSessionHolder,
     ServerSessionAware,
     ServerSessionHolder,
-    SessionHolder<ServerSession> {
+    SessionHolder<ServerSession>,
+    UsesToStringBuilder {
 
     static ApacheSshdServerShellCommand with(final CanLocaleForLanguageTag canLocaleForLanguageTag,
                                              final BiFunction<String, TerminalContext, Object> evaluator,
@@ -330,4 +333,25 @@ final class ApacheSshdServerShellCommand implements Command,
     }
 
     private ChannelSession channelSession;
+
+    // Object...........................................................................................................
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.buildFrom(this);
+    }
+
+    // UsesToStringBuilder..............................................................................................
+
+    @Override
+    public void buildToString(final ToStringBuilder builder) {
+        builder.label("canLocaleForLanguageTag")
+            .value(this.canLocaleForLanguageTag)
+            .label("evaluator")
+            .value(this.evaluator)
+            .label("terminalServerContext")
+            .value(this.terminalServerContext)
+            .label("environmentContext")
+            .value(this.environmentContext);
+    }
 }

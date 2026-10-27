@@ -17,9 +17,51 @@
 
 package walkingkooka.terminal.apachesshd;
 
+import org.junit.jupiter.api.Test;
+import walkingkooka.ToStringTesting;
+import walkingkooka.environment.EnvironmentContextTesting;
+import walkingkooka.locale.CanLocaleForLanguageTagTesting;
 import walkingkooka.reflect.PackagePrivateClassTesting;
+import walkingkooka.terminal.TerminalContext;
+import walkingkooka.terminal.server.FakeTerminalServerContext;
 
-public final class ApacheSshdServerShellCommandTest implements PackagePrivateClassTesting<ApacheSshdServerShellCommand> {
+import java.util.function.BiFunction;
+
+public final class ApacheSshdServerShellCommandTest implements CanLocaleForLanguageTagTesting,
+    EnvironmentContextTesting,
+    ToStringTesting<ApacheSshdServerShellCommand>,
+    PackagePrivateClassTesting<ApacheSshdServerShellCommand> {
+
+    // toString.........................................................................................................
+
+    @Test
+    public void testToString() {
+        this.toStringAndCheck(
+            ApacheSshdServerShellCommand.with(
+                CAN_LOCALE_FOR_LANGUAGE_TAG,
+                new BiFunction<String, TerminalContext, Object>() {
+                    @Override
+                    public Object apply(final String evaluate,
+                                        final TerminalContext terminalContext) {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "EVALUATOR";
+                    }
+                },
+                new FakeTerminalServerContext() {
+                    @Override
+                    public String toString() {
+                        return "TERMINAL_SERVER_CONTEXT";
+                    }
+                },
+                ENVIRONMENT_CONTEXT
+            ),
+            "canLocaleForLanguageTag=CAN_LOCALE_FOR_LANGUAGE_TAG evaluator=EVALUATOR terminalServerContext=TERMINAL_SERVER_CONTEXT environmentContext={charset=UTF-8, currency=AUD, indentation=\"  \", lineEnding=\"\\n\", locale=en_AU, loggingLevel=NONE, timeOffset=Z, user=user123@example.com}"
+        );
+    }
 
     // class............................................................................................................
 
