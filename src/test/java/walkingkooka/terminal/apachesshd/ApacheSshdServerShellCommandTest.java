@@ -17,20 +17,14 @@
 
 package walkingkooka.terminal.apachesshd;
 
-import walkingkooka.reflect.ClassTesting2;
-import walkingkooka.reflect.JavaVisibility;
+import walkingkooka.reflect.PackagePrivateClassTesting;
 
-public final class ApacheSshdServerShellCommandTest implements ClassTesting2<ApacheSshdServerShellCommand> {
+public final class ApacheSshdServerShellCommandTest implements PackagePrivateClassTesting<ApacheSshdServerShellCommand> {
 
     // class............................................................................................................
 
     @Override
     public Class<ApacheSshdServerShellCommand> type() {
         return ApacheSshdServerShellCommand.class;
-    }
-
-    @Override
-    public JavaVisibility typeVisibility() {
-        return JavaVisibility.PACKAGE_PRIVATE;
     }
 }
