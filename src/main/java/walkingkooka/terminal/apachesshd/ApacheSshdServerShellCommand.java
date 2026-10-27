@@ -31,6 +31,7 @@ import walkingkooka.UsesToStringBuilder;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.locale.CanLocaleForLanguageTag;
 import walkingkooka.locale.LocaleLanguageTag;
+import walkingkooka.logging.LoggerPath;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.predicate.Predicates;
 import walkingkooka.storage.StorageEnvironmentContext;
@@ -62,6 +63,8 @@ final class ApacheSshdServerShellCommand implements Command,
     ServerSessionHolder,
     SessionHolder<ServerSession>,
     UsesToStringBuilder {
+
+    LoggerPath SSH_SHELL_LOGGER = LoggerPath.parse("ssh.shell");
 
     static ApacheSshdServerShellCommand with(final CanLocaleForLanguageTag canLocaleForLanguageTag,
                                              final BiFunction<String, TerminalContext, Object> evaluator,
