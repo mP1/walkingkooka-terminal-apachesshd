@@ -29,6 +29,7 @@ import walkingkooka.io.TextReader;
 import walkingkooka.locale.CanLocaleForLanguageTag;
 import walkingkooka.locale.LocaleContexts;
 import walkingkooka.logging.CanLogs;
+import walkingkooka.logging.LoggerPath;
 import walkingkooka.logging.LoggingLevel;
 import walkingkooka.net.IpPort;
 import walkingkooka.terminal.TerminalContext;
@@ -57,6 +58,8 @@ import java.util.function.BiFunction;
  * Starts a Apache MINA SSHD server using a provided {@link TerminalServerContext} to create terminal sessions.
  */
 public final class ApacheSshdServer {
+
+    LoggerPath SSH_LOGGER = LoggerPath.parse("ssh");
 
     public static ApacheSshdServer with(final IpPort port,
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
