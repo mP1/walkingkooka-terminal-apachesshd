@@ -26,6 +26,8 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.environment.EnvironmentContexts;
 import walkingkooka.io.TextReader;
+import walkingkooka.locale.CanLocaleForLanguageTag;
+import walkingkooka.locale.LocaleContexts;
 import walkingkooka.logging.CanLogs;
 import walkingkooka.logging.LoggingLevel;
 import walkingkooka.net.IpPort;
@@ -59,6 +61,7 @@ public final class ApacheSshdServer {
     public static ApacheSshdServer with(final IpPort port,
                                         final BiFunction<String, String, Boolean> passwordAuthenticator,
                                         final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
+                                        final CanLocaleForLanguageTag canLocaleForLanguageTag,
                                         final BiFunction<String, TerminalContext, Object> evaluator,
                                         final EnvironmentContext environmentContext,
                                         final TerminalServerContext terminalServerContext) {
@@ -66,6 +69,7 @@ public final class ApacheSshdServer {
             Objects.requireNonNull(port, "port"),
             Objects.requireNonNull(passwordAuthenticator, "passwordAuthenticator"),
             Objects.requireNonNull(publicKeyAuthenticator, "publicKeyAuthenticator"),
+            Objects.requireNonNull(canLocaleForLanguageTag, "canLocaleForLanguageTag"),
             Objects.requireNonNull(evaluator, "evaluator"),
             Objects.requireNonNull(environmentContext, "environmentContext"),
             Objects.requireNonNull(terminalServerContext, "terminalServerContext")
@@ -75,6 +79,7 @@ public final class ApacheSshdServer {
     private ApacheSshdServer(final IpPort port,
                              final BiFunction<String, String, Boolean> passwordAuthenticator,
                              final BiFunction<String, PublicKey, Boolean> publicKeyAuthenticator,
+                             final CanLocaleForLanguageTag canLocaleForLanguageTag,
                              final BiFunction<String, TerminalContext, Object> evaluator,
                              final EnvironmentContext environmentContext,
                              final TerminalServerContext terminalServerContext) {
@@ -82,6 +87,7 @@ public final class ApacheSshdServer {
         this.passwordAuthenticator = passwordAuthenticator;
         this.publicKeyAuthenticator = publicKeyAuthenticator;
 
+        this.canLocaleForLanguageTag = canLocaleForLanguageTag;
         this.evaluator = evaluator;
 
         this.environmentContext = environmentContext;
@@ -97,6 +103,7 @@ public final class ApacheSshdServer {
 
         sshd.setShellFactory(
             (ChannelSession channel) -> ApacheSshdServerShellCommand.with(
+                this.canLocaleForLanguageTag,
                 this.evaluator,
                 this.terminalServerContext,
                 this.environmentContext
@@ -138,6 +145,11 @@ public final class ApacheSshdServer {
     private final BiFunction<String, TerminalContext, Object> evaluator;
 
     /**
+     * Used to translate each connecting user's locale embedded within the env var LANG
+     */
+    private final CanLocaleForLanguageTag canLocaleForLanguageTag;
+
+    /**
      * The template {@link EnvironmentContext} which shouldnt have a user, but has the system locale.
      */
     private final EnvironmentContext environmentContext;
@@ -169,6 +181,9 @@ public final class ApacheSshdServer {
             IpPort.with(2000),
             (u, p) -> u.length() > 0, // TODO not empty password
             (u, pk) -> false,
+            LocaleContexts.jre(
+                Locale.forLanguageTag("en-AU")
+            ), // CanLocaleForLanguageTag
             (final String expression, 
              final TerminalContext terminalContext) -> {
                 Objects.requireNonNull(expression, "expression");
