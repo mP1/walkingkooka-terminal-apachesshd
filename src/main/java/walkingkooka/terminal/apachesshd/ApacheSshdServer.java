@@ -30,6 +30,7 @@ import walkingkooka.locale.CanLocaleForLanguageTag;
 import walkingkooka.locale.LocaleContexts;
 import walkingkooka.logging.CanLogs;
 import walkingkooka.logging.LoggerPath;
+import walkingkooka.logging.LoggingContext;
 import walkingkooka.logging.LoggingLevel;
 import walkingkooka.net.IpPort;
 import walkingkooka.terminal.TerminalContext;
@@ -101,6 +102,19 @@ public final class ApacheSshdServer {
      * Prepares and starts the ssh server.
      */
     public void start() throws IOException {
+        final LoggingContext context = this.environmentContext;
+        context.logEnter(SSH_LOGGER);
+
+        try {
+            context.info("start port: " + this.port);
+            this.start0();
+        } finally {
+            context.info("started ready for connections");
+            context.logExit();
+        }
+    }
+
+    private void start0() throws IOException {
         final SshServer sshd = SshServer.setUpDefaultServer();
         sshd.setPort(this.port.value());
 
@@ -163,7 +177,16 @@ public final class ApacheSshdServer {
      * Stops or shuts down the ssh server.
      */
     public void stop() throws IOException {
-        this.sshd.stop();
+        final LoggingContext context = this.environmentContext;
+        context.logEnter(SSH_LOGGER);
+
+        try {
+            context.info("stopping " + this.port);
+            this.sshd.stop();
+        } finally {
+            context.info("stopped");
+            context.logExit();
+        }
     }
 
     private SshServer sshd;
