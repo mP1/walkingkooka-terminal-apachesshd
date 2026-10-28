@@ -32,6 +32,7 @@ import walkingkooka.environment.EnvironmentContext;
 import walkingkooka.locale.CanLocaleForLanguageTag;
 import walkingkooka.locale.LocaleLanguageTag;
 import walkingkooka.logging.LoggerPath;
+import walkingkooka.logging.LoggingContext;
 import walkingkooka.net.email.EmailAddress;
 import walkingkooka.predicate.Predicates;
 import walkingkooka.storage.StorageEnvironmentContext;
@@ -121,6 +122,23 @@ final class ApacheSshdServerShellCommand implements Command,
     @Override
     public void start(final ChannelSession channelSession,
                       final Environment environment) throws IOException {
+        final LoggingContext context = this.environmentContext;
+        context.logEnter(SSH_SHELL_LOGGER);
+
+        try {
+            context.info("start");
+            this.start0(
+                channelSession,
+                environment
+            );
+        } finally {
+            context.info("started");
+            context.logExit();
+        }
+    }
+
+    private void start0(final ChannelSession channelSession,
+                        final Environment environment) throws IOException {
         this.channelSession = channelSession;
 
         EmailAddress userEmail = null;
@@ -185,6 +203,8 @@ final class ApacheSshdServerShellCommand implements Command,
         final EnvironmentContext environmentContext = this.environmentContext;
 
         if (null != message) {
+            environmentContext.debug("Connection failed message: " + CharSequences.quoteAndEscape(message));
+
             this.err.write(
                 message.concat(environmentContext.lineEnding().toString())
                     .getBytes(environmentContext.charset())
@@ -195,6 +215,22 @@ final class ApacheSshdServerShellCommand implements Command,
             final EmailAddress finalUserEmail = userEmail;
             final Optional<Charset> finalCharset = Optional.ofNullable(charset);
             final Optional<Locale> finalLocale = Optional.ofNullable(locale);
+
+            if (environmentContext.isDebugEnabled()) {
+                final StringBuilder b = new StringBuilder();
+                b.append("New connection from " + finalUserEmail);
+
+                if (finalCharset.isPresent()) {
+                    b.append(" charset=" + finalCharset.get());
+                }
+                if (finalLocale.isPresent()) {
+                    b.append(" locale=" + finalLocale.get());
+                }
+                if (CharSequences.isNotNullOrEmpty(lang)) {
+                    b.append(" LANG=" + CharSequences.quoteAndEscape(lang));
+                }
+                environmentContext.debug(b.toString());
+            }
 
             final TerminalContext terminalContext = this.terminalServerContext.addTerminalContext(
                 (terminalId) -> this.createTerminalContext(
@@ -260,6 +296,10 @@ final class ApacheSshdServerShellCommand implements Command,
             storageEnvironmentContext.setLocale(
                 locale.get()
             );
+        }
+
+        if (storageEnvironmentContext.isDebugEnabled()) {
+            storageEnvironmentContext.debug("Environment=" + storageEnvironmentContext);
         }
 
         return ApacheSshdServerTerminalContext.with(
