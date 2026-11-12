@@ -29,7 +29,7 @@ import java.util.function.BiFunction;
 
 public final class ApacheSshdServerShellCommandTest implements CanLocaleForLanguageTagTesting,
     EnvironmentContextTesting,
-    ToStringTesting<ApacheSshdServerShellCommand>,
+    ToStringTesting,
     PackagePrivateClassTesting<ApacheSshdServerShellCommand> {
 
     // toString.........................................................................................................

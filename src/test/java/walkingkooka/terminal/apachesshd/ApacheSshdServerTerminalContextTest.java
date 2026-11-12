@@ -29,7 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public final class ApacheSshdServerTerminalContextTest implements TerminalContextTesting2<ApacheSshdServerTerminalContext>,
-    ToStringTesting<ApacheSshdServerTerminalContext> {
+    ToStringTesting {
 
     @Override
     public ApacheSshdServerTerminalContext createContext() {
